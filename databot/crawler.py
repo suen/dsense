@@ -3,6 +3,7 @@ import oauth2 as oauth
 import urllib2 as urllib
 from pymongo import MongoClient
 import sys,traceback
+import time
 
 ##API key HlbiNsr9OqDHRnZCbLq3EraSR
 ##API secret AK1iPnjxR0eFGlUNtIQisbtuDgbiYohLCiMUBqaZZdElbBrOR1
@@ -76,12 +77,26 @@ def fetchsamples():
     c = c + 1
   print(str(c) + " tweets extracted")
 
-if __name__ == "__main__":
+def checkifrunning():
+  mg = MongoClient()
+  db = mg.twitter
+  
+  count1 = db.tweets.find().count()
+  time.sleep(10)
+  count2 = db.tweets.find().count()
 
+  return not (count1 == count2)
+  
+
+if __name__ == "__main__":
+	
+	if checkifrunning():
+		sys.exit(0)
+		
 	for i in range(0, 100):
 		try:
 			fetchsamples()
 		except:
 			sys.exit(-1)
-			traceback.print_exc(file=crawler.log)
+			traceback.print_exc(file=sys.stdout)
 
