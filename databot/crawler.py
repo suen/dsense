@@ -2,6 +2,7 @@ import json
 import oauth2 as oauth
 import urllib2 as urllib
 from pymongo import MongoClient
+import sys
 
 ##API key HlbiNsr9OqDHRnZCbLq3EraSR
 ##API secret AK1iPnjxR0eFGlUNtIQisbtuDgbiYohLCiMUBqaZZdElbBrOR1
@@ -74,8 +75,10 @@ def fetchsamples():
       pass
     c = c + 1
 
+if __name__ == "__main__":
+	try:
+		fetchsamples()
+	except:
+		sys.exit(-1)
+		pass	
 
-try:
-	fetchsamples()
-except:
-	fetchsamples()
