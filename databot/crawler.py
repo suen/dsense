@@ -2,7 +2,7 @@ import json
 import oauth2 as oauth
 import urllib2 as urllib
 from pymongo import MongoClient
-import sys
+import sys,traceback
 
 ##API key HlbiNsr9OqDHRnZCbLq3EraSR
 ##API secret AK1iPnjxR0eFGlUNtIQisbtuDgbiYohLCiMUBqaZZdElbBrOR1
@@ -74,11 +74,14 @@ def fetchsamples():
       print line
       pass
     c = c + 1
+  print(str(c) + " tweets extracted")
 
 if __name__ == "__main__":
-	try:
-		fetchsamples()
-	except:
-		sys.exit(-1)
-		pass	
+
+	for i in range(0, 100):
+		try:
+			fetchsamples()
+		except:
+			sys.exit(-1)
+			traceback.print_exc(file=crawler.log)
 
