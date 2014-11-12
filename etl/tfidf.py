@@ -21,7 +21,7 @@ class ETL:
 	def histogram(self, sentence):
 		
 		if (sentence is None):
-			return
+			return None
 		
 		words = sentence.lower().split(" ")
 
@@ -55,8 +55,11 @@ class ETL:
 		for tw in collection.find():
 			histo = self.histogram(tw['tweet'])
 			id = tw['_id']
-			#print tw['tweet'], histo
-			collection.update( {"_id": id}, {"$set": {"histo": histo}} )
+			if histo is None:
+				collection.remove({"_id": id})
+			else:
+				#print tw['tweet'], histo
+				collection.update( {"_id": id}, {"$set": {"histo": histo}} )
 
 	def makeKeywordDictionnary(self, tweetCollection, tweetKWCollection):
 		mapjs = '''
@@ -128,6 +131,7 @@ class ETL:
 				continue
 
 			tfidf = {}
+			idf = {}
 
 			for kw in kws:
 				tf = kws[kw]
@@ -135,12 +139,13 @@ class ETL:
 					continue
 				
 				tfidf[kw] = tf * idfs[kw]
+				idf[kw] = idfs[kw]
 				#print kw,tf,idf['idf']
 			
 			#print tfidf
 			done += 1
 			#print done
-			tweetCollection.update({"_id": tw['_id']}, {"$set": {"tfidf": tfidf}})
+			tweetCollection.update({"_id": tw['_id']}, {"$set": {"tfidf": tfidf, "idf": idf}})
 
 if __name__ == "__main__":
 	etl = ETL()
