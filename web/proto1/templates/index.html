@@ -1,0 +1,109 @@
+$def with (param, clusterList, error)
+<!DOCTYPE html>
+<html>
+<head>
+	<title>IPW - Search is now what you see</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- Bootstrap -->
+	<link href="/static/css/bootstrap.min.css" rel="stylesheet" media="screen">
+	<link href="/static/css/ipwstyle.css" rel="stylesheet" media="screen">
+</head>
+<body>
+	<div class="container-fluid">
+		<div class="ipw-header">
+			<table class="ipw-table">
+					<form action="/" style="display: block;" method="POST" enctype="multipart/form-data">
+				<tr>
+					<td rowspan="4" style="width: 130px">
+						<!--<img src="/static/img/IPW.gif" alt="" width="100" style="float: left;"> -->
+						<h1>Dsense</h1>
+					</td>
+					<td class="right">K :</td>
+					<td><input type="text" name="k" value="10" class="input-small"/></td>
+					<td>Iteration</td>
+					<td><input type="text" name="iteration" value="15" class="input-small"/></td>
+					<td>p : </td>
+					<td><input type="text" name="p" value="0.5" class="input-small"/></td>
+					<td rowspan="4"class="right" style="margin-top: 10px;">
+						<button class="btn-large btn-primary">Cluster</button>
+					</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td class="right">Distance:</td>
+					<td colspan="2">
+						<select class="form-control" style="width: 120px" id="distance" name="distance">
+							<option value="cosine">COSINE</option>
+							<option value="euclidean">EUCLIDEAN</option>
+							<option value="manhattan">MANHATTAN</option>
+						</select>
+					</td>
+
+					<td class="right">Seed:</td>
+					<td colspan="2">
+						<select class="form-control" style="width: 120px" id="seed" name="seed">
+							<option value="random">RANDOM</option>
+							<option value="KMPP">KMPP</option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td class="right">Nb tweets</td>
+					<td ><input style="margin-bottom: 0px;" type="text" name="nbtweets" value="1000" class="input-small"/>
+						<p style="margin:1px; padding: 0px;"><input type="checkbox" name="randomTweet" value="1" />rand</p>
+					</td>
+					<td class="right">Min words:</td>
+					<td ><input type="text" name="minword" value="4"class="input-small"/></td>
+					<td class="right">display Tweet</td>
+					<td ><input type="text" name="displayTweets" value="4" class="input-small"/></td>
+				</tr>
+				</form>
+			</table>
+		</div>
+		<div class="ipw-content">
+			<div class="ipw-result">
+				<!--
+				<div class="acluster">
+					<p>text 1 is so big that </p>
+					<p>text 2</p>
+					<p>text 3</p>
+				</div>
+				<div class="acluster">
+					<p>life is good</p>
+					<p>buy iphone, stay stupid, die of hunger</p>
+					<p>soon you will samsung every day</p>
+				</div>
+				<div class="acluster">
+					<p>Two strings walk into bar</p>
+					<p>How many screw drivers needed</p>
+					<p>Drive green</p>
+				</div>
+				-->
+			$if len(clusterList) != 0:
+				<h2>Results: </h2>
+				<p>With K = "$param['k']", Iteration = "$param['iteration']", p = "$param['p']", Distance = "$param['distance']", Seed = "$param['seed']"</p>
+				$for cluster in clusterList:
+					<div class="acluster">
+					$for tw in cluster:
+						<p>$tw</p>
+					</div>
+			$else:
+			</div>
+			<div style="clear:both;"></div>
+			<h4>Launch Clustering above for result</h4>
+
+			$if error != "":
+				<h3>$error</h3>
+		</div>
+
+
+
+		<div class="ipw-footer">
+			<p class="ipw-center">Copyleft Dsense, all rights left out</p>
+		</div>
+	</div>
+
+	<script src="/static/js/jquery.js"></script>
+	<script src="/static/js/bootstrap.min.js"></script>
+</body>
+</html>
