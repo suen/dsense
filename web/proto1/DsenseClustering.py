@@ -1,6 +1,8 @@
 from pymongo import MongoClient
+#from pymongo.objectid import ObjectId
 from pattern.vector import Document, Model, KMEANS, RANDOM, COSINE, EUCLIDEAN, MANHATTAN, RANDOM, KMPP
 import random
+from bson.objectid import ObjectId
 
 
 class Cluster:
@@ -23,6 +25,10 @@ class Cluster:
 			c = self.db.tweetText.find().limit(tweetCount)
 		tt = []
 		for t in c:
+			if len(Document(t['tweet'].replace("RT", "")).features) < wordThreshold :
+				continue
+			tt.append((str(t['_id']),t['tweet']))
+			'''
 			words = t['histo']
 			if len(words) < wordThreshold:
 				continue
@@ -30,6 +36,7 @@ class Cluster:
 			for word in words:
 				sent += word + " "
 			tt.append(sent.strip())
+			'''
 		return tt
 
 	'''
@@ -38,7 +45,10 @@ class Cluster:
 	def toDocList(self, strList):
 		ttDoc = []
 		for str in strList:
-			ttDoc.append(Document(str))
+			if type(str) is tuple:
+				ttDoc.append(Document(str[1], name=str[0]))
+			else:
+				ttDoc.append(Document(str))
 		return ttDoc
 
 	
@@ -84,11 +94,15 @@ class Cluster:
 	extracts the original text from the pattern.vector.Document
 	'''
 	def docStr(self, doc):
+		'''
 		s = ""
 		for w in doc.features:
 			s += w + " "
 		s = s.strip()
-		return s
+		'''
+		twid = doc.name
+		tweet = self.db.tweetText.find({"_id": ObjectId(twid)})[0]['tweet']
+		return tweet
 	
 	'''
 	transforms a pattern.vector.Document inside a list into list of strings
