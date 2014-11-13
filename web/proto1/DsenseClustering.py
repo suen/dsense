@@ -16,18 +16,25 @@ class Cluster:
 	a list of string
 	'''
 	def	retrieveTweets(self, tweetCount, wordThreshold=3, aleatoire=False):
+		print "here"
 		if aleatoire:
-			twc = self.db.tweetText.find().count()
+			twc = self.db.tweets.find().count()
 			pivot = random.randint(tweetCount, twc - tweetCount - 1)
 			thalf = int(tweetCount/2)
-			c = self.db.tweetText.find().skip(pivot - thalf).limit(tweetCount)
+			c = self.db.tweets.find().skip(pivot - thalf).limit(tweetCount)
 		else:
-			c = self.db.tweetText.find().limit(tweetCount)
+			c = self.db.tweets.find().limit(tweetCount)
 		tt = []
 		for t in c:
-			if len(Document(t['tweet'].replace("RT", "")).features) < wordThreshold :
+			if t is None:
 				continue
-			tt.append((str(t['_id']),t['tweet']))
+			if not t.has_key("text"):
+				continue
+
+			if len(Document(t['text'].replace("RT", "")).features) < wordThreshold :
+				continue
+			print t['text']
+			tt.append((str(t['_id']),t['text']))
 			'''
 			words = t['histo']
 			if len(words) < wordThreshold:
@@ -101,7 +108,7 @@ class Cluster:
 		s = s.strip()
 		'''
 		twid = doc.name
-		tweet = self.db.tweetText.find({"_id": ObjectId(twid)})[0]['tweet']
+		tweet = self.db.tweets.find({"_id": ObjectId(twid)})[0]['text']
 		return tweet
 	
 	'''
@@ -146,6 +153,7 @@ class Cluster:
 if __name__ == "__main__":
 	
 	clustering = Cluster()
+	print "initiating tweets .."
 	docList = clustering.toDocList(clustering.retrieveTweets(1000,4,True))
 	print "clustering .."
 	cluster = clustering.kmeansCluster(docList, 10, 10, "cosine", "random", 0.5)
