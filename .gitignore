@@ -3,4 +3,6 @@
 *.pyc
 *.json
 *.csv
+*.ini
+*.swp*
 
