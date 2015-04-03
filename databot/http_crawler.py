@@ -5,6 +5,7 @@ from pymongo import MongoClient
 import sys,traceback
 import time
 import ConfigParser
+from threading import Thread
 
 class TwitterAPIClient:
 
@@ -72,8 +73,41 @@ class TwitterAPIClient:
 
 	def fetchPublicStream(self, lang="en", track="twitter"):
 		url = "https://stream.twitter.com/1.1/statuses/filter.json?language="+lang+"&track="+urllib.quote(track)
-		response = self.twitterRequest(url, "GET");
+		response = self.twitterRequest(url, "POST");
 		return response
+	
+	def fetchPublicStreamSample(self):
+		url = "https://stream.twitter.com/1.1/statuses/sample.json"
+		response = self.twitterRequest(url, "GET");
+	
+	def saveFilterStream(self, urlresponse, collection, minNbWords=1, lang="en"):
+		mclient = MongoClient()
+		dbcollection = mclient.twitter[collection]
+		self.buffer = []
+		
+		t = Thread(target=self.saveFilterStreamThread, args=(dbcollection,minNbWords,lang) )
+		t.setDaemon(True)
+		t.start()
+
+		for r in urlresponse:
+			self.buffer.append(r)
+
+	
+	def saveFilterStreamThread(self, dbcollection, minNbWords, lang):
+		while True:
+			if len(self.buffer) == 0:
+				time.sleep(0.01)
+				continue
+
+			tweet = self.buffer.pop()
+			try:
+				r = json.loads(tweet.strip())
+				
+				if (r['lang'] == lang and len(r['text'].strip(" ")) >= minNbWords):
+					print r['text'] 
+					#dbcollection.insert(r)
+			except:
+				pass
 	
 	def fetchTrends(self, woeid=1):
 		url = "https://api.twitter.com/1.1/trends/place.json?id="+str(woeid)
@@ -87,6 +121,15 @@ class TwitterAPIClient:
 			try:
 				r = json.loads(r.strip())
 				dbcollection.insert(r)
+			except:
+				pass
+	
+	def printStream(self, response, projection=[]):
+		for r in response:
+			try:
+				r = json.loads(r.strip())
+				if r['lang'] == "en":
+					print r['text']
 			except:
 				pass
 		
@@ -112,5 +155,5 @@ class TwitterAPIClient:
 
 if __name__ == "__main__":
 	tc = TwitterAPIClient()	
-	tc.getTweetsFromUsers()
-
+	resp = tc.fetchPublicStream()
+	tc.saveFilterStream(resp, "sample", 5)
