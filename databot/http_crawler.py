@@ -94,6 +94,7 @@ class TwitterAPIClient:
 
 	
 	def saveFilterStreamThread(self, dbcollection, minNbWords, lang):
+		processed = 0
 		while True:
 			if len(self.buffer) == 0:
 				time.sleep(0.00001)
@@ -104,8 +105,12 @@ class TwitterAPIClient:
 				r = json.loads(tweet.strip())
 				
 				if (r['lang'] == lang and len(r['text'].strip(" ")) >= minNbWords):
-					print r['text'] 
-					#dbcollection.insert(r)
+					#print r['text'] 
+					dbcollection.insert(r)
+					processed += 1
+
+				if processed % 100 == 0:
+					print "Processed : " + str(processed)
 			except:
 				pass
 	
