@@ -96,7 +96,7 @@ class TwitterAPIClient:
 	def saveFilterStreamThread(self, dbcollection, minNbWords, lang):
 		while True:
 			if len(self.buffer) == 0:
-				time.sleep(0.01)
+				time.sleep(0.00001)
 				continue
 
 			tweet = self.buffer.pop()
@@ -156,4 +156,4 @@ class TwitterAPIClient:
 if __name__ == "__main__":
 	tc = TwitterAPIClient()	
 	resp = tc.fetchPublicStream()
-	tc.saveFilterStream(resp, "sample", 5)
+	tc.saveFilterStream(resp, "sample", 6)
