@@ -79,6 +79,7 @@ class TwitterAPIClient:
 	def fetchPublicStreamSample(self):
 		url = "https://stream.twitter.com/1.1/statuses/sample.json"
 		response = self.twitterRequest(url, "GET");
+		return response
 	
 	def saveFilterStream(self, urlresponse, collection, minNbWords=1, lang="en"):
 		mclient = MongoClient()
