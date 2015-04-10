@@ -159,9 +159,8 @@ class SemanticClustering:
 		#print len(tweets)
 		return tweets, unique_hashtags
 
-	def test_find_max_n(self):
+	def test_find_max_n(self, collection):
 		logfile = open("purity_result.txt", "a")
-		collection = "sample"
 		tweets, uhashtags = self.extractTweetsWithHashTag(collection)
 
 		stdout = ""
@@ -174,7 +173,7 @@ class SemanticClustering:
 		
 		print stdout
 		logfile.write(stdout)
-		for i in range(50, 110, 50):
+		for i in range(50, len(uhashtags), 50):
 			t1 = time.time()
 			topicCluster,tweetTopic = self.topicClustering(tweets, i)
 			t2 = time.time()
@@ -185,4 +184,5 @@ class SemanticClustering:
 			print line
 
 semanticModel = SemanticClustering()
-semanticModel.test_find_max_n()
+semanticModel.test_find_max_n("trends")
+semanticModel.test_find_max_n("sample")
