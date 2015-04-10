@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import sys,os,re
+import sys,os,re,time
 import json 
 from gensim import corpora, models, similarities
 from pymongo import MongoClient
@@ -160,12 +160,29 @@ class SemanticClustering:
 		return tweets, unique_hashtags
 
 	def test_find_max_n(self):
-		tweets, uhashtags = self.extractTweetsWithHashTag("sample")
+		logfile = open("purity_result.txt", "a")
+		collection = "sample"
+		tweets, uhashtags = self.extractTweetsWithHashTag(collection)
 
-		for i in range(50, 100, 50):
+		stdout = ""
+		stdout +=  "--------------------------------\n"
+		stdout += "Collection: %s\n"%collection
+		stdout += "Tweets : %d \n"%len(tweets)
+		stdout += "Unique hastags : %d\n"%len(uhashtags)
+		stdout += "--------------------------------\n"
+		stdout += "N \t Detected \t Purity \t Time\n" 
+		
+		print stdout
+		logfile.write(stdout)
+		for i in range(50, 110, 50):
+			t1 = time.time()
 			topicCluster,tweetTopic = self.topicClustering(tweets, i)
+			t2 = time.time()
 			purity = self.calculatePurity(topicCluster)		
-			print i, len(uhashtags), purity	
+			line = "%d \t %d \t %f \t %f\n"%(i, len(topicCluster), purity, round((t2-t1),2))
+
+			logfile.write(line)
+			print line
 
 semanticModel = SemanticClustering()
 semanticModel.test_find_max_n()
