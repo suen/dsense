@@ -34,4 +34,6 @@ print trendstr
 print "============================================"
 
 res = tc.fetchPublicStream("en", trendstr)
+for r in res:
+	print r
 tc.saveStream(res, "trends")

@@ -110,8 +110,8 @@ class TwitterAPIClient:
 					dbcollection.insert(r)
 					processed += 1
 
-				if processed % 100 == 0:
-					print "Processed : " + str(processed)
+					if processed % 100 == 0:
+						print "Processed : " + str(processed)
 			except:
 				pass
 	
@@ -161,5 +161,7 @@ class TwitterAPIClient:
 
 if __name__ == "__main__":
 	tc = TwitterAPIClient()	
-	resp = tc.fetchPublicStream()
+	resp = tc.fetchPublicStreamSample()
+	for r in resp:
+		print r
 	tc.saveFilterStream(resp, "sample", 6)
