@@ -5,8 +5,8 @@ from gensim import corpora, models, similarities
 from pymongo import MongoClient
 from threading import Thread
 from datastream import FeedListener
-import time
-import http
+import web 
+from patterns import Singleton
 
 class SuperDictionary:
 	def __init__(self):
@@ -14,36 +14,30 @@ class SuperDictionary:
 		self.dictionary = corpora.Dictionary()
 		self.dictionary.add_documents([words])
 
-class ModelWrapper:
-	class LDAModel:
-		def __init__(self):
-			pass
-
-		def setName(self,name):
-			self.name = name
-
-		def setDictionary(self, dictionary):
-			self.dictionary = dictionary
-
-		def initialize(self):
-			self.lda = models.LdaModel(id2word=self.dictionary, num_topics=200) 
-		
-		def trainModel(self, stream):
-			#tfidf = models.TfidfModel(docs);
-			#self.corpus_tfidf = tfidf[docs]
-			self.lda.update(stream) #let's assume this works
-
-		def query(self, doc):
-			return self.lda[doc]
-
-	instance = None
-
+@Singleton
+class LDAModel:
 	def __init__(self):
-		if ModelWrapper.instance is None:
-			ModelWrapper.instance = ModelWrapper.LDAModel()
+		pass
+
+	def setName(self,name):
+		self.name = name
+
+	def setDictionary(self, dictionary):
+		self.dictionary = dictionary
+
+	def initialize(self):
+		self.lda = models.LdaModel(id2word=self.dictionary, num_topics=200) 
 	
-	def getLDAModel(self):
-		return ModelWrapper.instance
+	def trainModel(self, stream):
+		#tfidf = models.TfidfModel(docs);
+		#self.corpus_tfidf = tfidf[docs]
+		self.lda.update(stream) #let's assume this works
+
+	def query(self, doc):
+		return self.lda[doc]
+
+	def show_topics(self, nb_topics=10):
+		return self.lda.show_topics(num_topics=nb_topics)
 	
 class TwitterMiniBatch:
 	def __init__(self):
@@ -114,54 +108,3 @@ class TwitterMiniBatch:
 			enrichedStream.append(d)
 		return enrichedStream
 
-class Main:
-	def __init__(self):
-		self.model = None
-
-		self.httpThread = Thread(target=self.starthttp)
-		self.httpThread.setDaemon(True)
-		self.httpThread.start()
-
-	def starthttp(self):
-		http.run()
-	
-	def run(self):
-		sdict = SuperDictionary()
-		tmb = TwitterMiniBatch()
-
-		tmb.setDictionary(sdict.dictionary)
-
-		self.model = ModelWrapper().getLDAModel()
-		self.model.setName("model1")
-		self.model.setDictionary(sdict.dictionary)
-		self.model.initialize()
-
-		#self.model = LDAModel("model1", sdict.dictionary)
-
-		streamfeed = FeedListener()
-		streamfeed.setDataHandler(tmb)
-		streamfeed.startListen()
-
-		b = 1
-		while True:
-			time.sleep(1)
-			if not tmb.hasData():
-				continue
-
-			print "=========Batch " + str(b) + "=========="
-			self.model.trainModel(tmb)
-
-			enr = tmb.enrichDoc(self.model)
-			
-			streamfeed.publish(enr)
-
-			print str(len(enr)) + " enriched "
-
-			tmb.queuePop()
-			b += 1
-			print "================== "
-
-	
-if __name__ == "__main__":
-	main = Main()
-	main.run()
