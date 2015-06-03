@@ -7,6 +7,11 @@ from threading import Thread
 from datastream import FeedListener
 import time
 
+class SuperDictionary:
+	def __init__(self):
+		words = [ x.strip() for x in open("dictnostops.txt").readlines() ]
+		self.dictionary = corpora.Dictionary()
+		self.dictionary.add_documents([words])
 
 class LDAModel:
 	def __init__(self, name, dictionary):
@@ -24,12 +29,12 @@ class LDAModel:
 	
 class TwitterMiniBatch:
 	def __init__(self):
-		words = [ x.strip() for x in open("dictnostops.txt").readlines() ]
-		self.dictionary = corpora.Dictionary()
-		self.dictionary.add_documents([words])
 		self.buffer = []
 		self.queue = []
 		self.threshold = 10
+	
+	def setDictionary(self, dictionary):
+		self.dictionary = dictionary
 
 	def feed(self, tweetjson):
 		if not tweetjson.has_key("text"):
@@ -74,12 +79,6 @@ class TwitterMiniBatch:
 			yield self.dictionary.doc2bow(self.clean(d['text']).lower().split())
 
 
-		"""
-		self.initCursor()
-		for d in self.cursor:
-			yield self.dictionary.doc2bow(self.clean(d['text']).lower().split())
-		"""
-
 	#need lazy evaluation for this one
 	def enrichDoc(self, model):
 		enrichedStream = []
@@ -96,66 +95,47 @@ class TwitterMiniBatch:
 			#print d['text'] + " = ", d['topic']
 			enrichedStream.append(d)
 		return enrichedStream
+
+class Main:
 	
-
-def dataFeedThread():
-	x = 0
-	while True:
-		time.sleep(5)
-		mg.query("nepal", x, 5)
-		x += 19
-		for d in mg.cursor:
-			mg.feed(d)
+	def __init__(self):
+		self.httpThread = Thread(target=self.starthttp)
+		self.httpThread.setDaemon(True)
 	
-#thread = Thread(target=dataFeedThread)
-#thread.setDaemon(True)
-#thread.start()
-
-mg = TwitterMiniBatch()
-lda = LDAModel("model1", mg.dictionary)
-
-streamfeed = FeedListener()
-streamfeed.setDataHandler(mg)
-streamfeed.startListen()
-
-b = 1
-while True:
-	time.sleep(1)
+	def starthttp(self):
+		pass
 	
-	if not mg.hasData():
-		continue
+	def run(self):
+		sdict = SuperDictionary()
+		tmb = TwitterMiniBatch()
 
-	print "=========Batch " + str(b) + "=========="
-	lda.trainModel(mg)
+		tmb.setDictionary(sdict.dictionary)
+		lda = LDAModel("model1", sdict.dictionary)
 
-	enr = mg.enrichDoc(lda)
+		streamfeed = FeedListener()
+		streamfeed.setDataHandler(tmb)
+		streamfeed.startListen()
+
+		b = 1
+		while True:
+			time.sleep(1)
+			if not tmb.hasData():
+				continue
+
+			print "=========Batch " + str(b) + "=========="
+			lda.trainModel(tmb)
+
+			enr = tmb.enrichDoc(lda)
+			
+			streamfeed.publish(enr)
+
+			print str(len(enr)) + " enriched "
+
+			tmb.queuePop()
+			b += 1
+			print "================== "
+
 	
-	streamfeed.publish(enr)
-
-	#for e in enr:
-	#	print e," to redis"
-	print str(len(enr)) + " enriched "
-	'''
-	l = 0
-	for x in mg:
-		print x
-		l += 1
-	'''
-	mg.queuePop()
-
-	b += 1
-	print "================== "
-
-exit()
-
-
-"""
-mg.query("nepal", 0, 10)
-mgg = lda.trainModel(mg)
-
-mg.query("nepal", 10, 10)
-mgg = lda.trainModel(mg)
-
-mg.query("nepal", 0, 20)
-encriched = mg.enrichDoc(lda)
-"""
+if __name__ == "__main__":
+	main = Main()
+	main.run()
