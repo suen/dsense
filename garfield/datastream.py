@@ -1,14 +1,18 @@
 import redis
 import time
 from threading import Thread
+import json
 
 class FeedListener:
 
 	def __init__(self):
-		r = redis.StrictRedis()
-		self.p = r.pubsub()
+		self.r = redis.StrictRedis()
+		self.p = self.r.pubsub()
 		self.p.subscribe("twitter-feed")
+		self.handler = None
 		
+		print "====", self.p.get_message()
+
 		self.dataThread = Thread(target=self.listen)
 		self.dataThread.setDaemon(True)
 
@@ -17,53 +21,45 @@ class FeedListener:
 
 	def startListen(self):
 		self.dataThread.start()
+	
+	def publish(self, msg):
+		if isinstance(msg, list):
+			for m in msg:
+				self.r.publish("twitter-persist", json.dumps(m) )
+			msgsize = len(msg)
+			print "INFO: " + str(msgsize) + " tweets published"
+		else:
+			self.r.publish("twitter-persist", json.dumps(msg) )
+			print "INFO: 1 tweet published"
+		
 
 	def listen(self):
-		print "here"
 		while True:
 			msg = self.p.get_message()
 			if msg == None:
 				time.sleep(1)
 				continue
-			print msg
+			if not isinstance(msg['data'],str): 
+				print type(msg['data'])
+				print msg
+				continue
+			if self.handler is not None:
+				msg = json.loads(str(msg['data']))
+				self.handler.feed(msg)
+			else:
+				print msg['data'] 
 
-class TwitterStream:
+class HandlerTest:
 	def __init__(self):
-		words = [ x.strip() for x in open("dictnostops.txt").readlines() ]
-		self.dictionary = corpora.Dictionary()
-		self.dictionary.add_documents([words])
+		pass
 	
-	def feed(self, data)
-	
-	def query(self, collection, start, count):
-		self.collection = collection
-		self.start = start
-		self.count = count
-		self.initCursor()
-
-	def initCursor(self):
-		self.db = MongoClient().twitter[self.collection]
-		self.cursor = self.db.find({"text": {"$exists": True}},{"text":1}).skip(self.start).limit(self.count)
-	
-	def clean(self, text):
-		text = text.replace("RT", "")
-		
-		hi = text.find("http")
-		if hi != -1 :
-			text += " "
-			si = text.find(" ",hi)
-			text = text[0:hi]+text[si:]
-			text = text.strip() 
-		return text
-
-	def __iter__(self):
-		self.initCursor()
-		for d in self.cursor:
-			yield self.dictionary.doc2bow(self.clean(d['text']).lower().split())
+	def feed(self,msg):
+		print len(str(msg)), " chars feed"	
 	
 if __name__ == "__main__":
-	
+	h = HandlerTest()
 	d = FeedListener()
+	d.setDataHandler(h)
 	d.startListen()
 	
 	d.dataThread.join()
