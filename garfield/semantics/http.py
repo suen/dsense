@@ -1,25 +1,25 @@
 import web
+from semantics import LDAModel 
 
 urls = (
     '/', 'REST',
 )
 
-model = None 
-
 class REST:        
 	def GET(self):
-		if model is None:
-			return "Hello world"
+		param = web.input(query="")
+		
+		query = param.query
+		if query == "":
+			return "" 
 
-		return str(model) 
+		model = LDAModel.Instance()
+		topics = model.textquery(query)
+
+		return str(topics) 
 	
 	def POST(self):
-		pass
-		try:
-			pass
-		except:
-			pass
-			return None 
+		self.GET()
 
 def run():
 	app = web.application(urls, globals())
