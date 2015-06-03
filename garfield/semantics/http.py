@@ -4,11 +4,14 @@ urls = (
     '/', 'REST',
 )
 
-render = web.template.render('templates')
+model = None 
 
 class REST:        
 	def GET(self):
-		return "hello world" 
+		if model is None:
+			return "Hello world"
+
+		return str(model) 
 	
 	def POST(self):
 		pass
@@ -18,7 +21,10 @@ class REST:
 			pass
 			return None 
 
-if __name__ == "__main__":
+def run():
 	app = web.application(urls, globals())
 	app.internalerror = web.debugerror
 	app.run()
+
+if __name__ == "__main__":
+	run()
