@@ -6,6 +6,7 @@ from pymongo import MongoClient
 from threading import Thread
 from datastream import FeedListener
 import time
+import http
 
 class SuperDictionary:
 	def __init__(self):
@@ -13,19 +14,36 @@ class SuperDictionary:
 		self.dictionary = corpora.Dictionary()
 		self.dictionary.add_documents([words])
 
-class LDAModel:
-	def __init__(self, name, dictionary):
-		self.name = name
-		self.lda = models.LdaModel(id2word=dictionary, num_topics=200) 
+class ModelWrapper:
+	class LDAModel:
+		def __init__(self):
+			pass
+
+		def setName(self,name):
+			self.name = name
+
+		def setDictionary(self, dictionary):
+			self.dictionary = dictionary
+
+		def initialize(self):
+			self.lda = models.LdaModel(id2word=self.dictionary, num_topics=200) 
+		
+		def trainModel(self, stream):
+			#tfidf = models.TfidfModel(docs);
+			#self.corpus_tfidf = tfidf[docs]
+			self.lda.update(stream) #let's assume this works
+
+		def query(self, doc):
+			return self.lda[doc]
+
+	instance = None
+
+	def __init__(self):
+		if ModelWrapper.instance is None:
+			ModelWrapper.instance = ModelWrapper.LDAModel()
 	
-	def trainModel(self, stream):
-		#tfidf = models.TfidfModel(docs);
-		#self.corpus_tfidf = tfidf[docs]
-		self.lda.update(stream) #let's assume this works
-
-	def query(self, doc):
-		return self.lda[doc]
-
+	def getLDAModel(self):
+		return ModelWrapper.instance
 	
 class TwitterMiniBatch:
 	def __init__(self):
@@ -97,20 +115,28 @@ class TwitterMiniBatch:
 		return enrichedStream
 
 class Main:
-	
 	def __init__(self):
+		self.model = None
+
 		self.httpThread = Thread(target=self.starthttp)
 		self.httpThread.setDaemon(True)
-	
+		self.httpThread.start()
+
 	def starthttp(self):
-		pass
+		http.run()
 	
 	def run(self):
 		sdict = SuperDictionary()
 		tmb = TwitterMiniBatch()
 
 		tmb.setDictionary(sdict.dictionary)
-		lda = LDAModel("model1", sdict.dictionary)
+
+		self.model = ModelWrapper().getLDAModel()
+		self.model.setName("model1")
+		self.model.setDictionary(sdict.dictionary)
+		self.model.initialize()
+
+		#self.model = LDAModel("model1", sdict.dictionary)
 
 		streamfeed = FeedListener()
 		streamfeed.setDataHandler(tmb)
@@ -123,9 +149,9 @@ class Main:
 				continue
 
 			print "=========Batch " + str(b) + "=========="
-			lda.trainModel(tmb)
+			self.model.trainModel(tmb)
 
-			enr = tmb.enrichDoc(lda)
+			enr = tmb.enrichDoc(self.model)
 			
 			streamfeed.publish(enr)
 
