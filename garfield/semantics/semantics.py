@@ -35,6 +35,11 @@ class LDAModel:
 
 	def query(self, doc):
 		return self.lda[doc]
+	
+	def textquery(self,text):
+		text = text.lower().split()
+		doc = self.dictionary.doc2bow(text)
+		return self.lda[doc]
 
 	def show_topics(self, nb_topics=10):
 		return self.lda.show_topics(num_topics=nb_topics)
