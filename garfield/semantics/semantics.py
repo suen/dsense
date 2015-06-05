@@ -39,7 +39,11 @@ class LDAModel:
 	def textquery(self,text):
 		text = text.lower().split()
 		doc = self.dictionary.doc2bow(text)
-		return self.lda[doc]
+		results = self.lda[doc]
+		topics = []
+		for result in results:
+			topics.append({"model": self.name + "-" + str(result[0]), "score": result[1]})
+		return topics 
 
 	def show_topics(self, nb_topics=10):
 		return self.lda.show_topics(num_topics=nb_topics)
@@ -106,7 +110,7 @@ class TwitterMiniBatch:
 			
 			td = []
 			for tt in res:
-				td.append((model.name + "-" + str(tt[0]), tt[1]))
+				td.append({"model": model.name + "-" + str(tt[0]), "score": tt[1]})
 				
 			d['topic'] = td
 			#print d['text'] + " = ", d['topic']
