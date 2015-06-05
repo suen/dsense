@@ -1,5 +1,6 @@
 import web
 from semantics import LDAModel 
+import json
 
 urls = (
     '/', 'REST',
@@ -16,7 +17,9 @@ class REST:
 		model = LDAModel.Instance()
 		topics = model.textquery(query)
 
-		return str(topics) 
+		result = {"result": topics}
+
+		return json.dumps(result) 
 	
 	def POST(self):
 		self.GET()
