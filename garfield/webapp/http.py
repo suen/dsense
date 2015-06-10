@@ -2,6 +2,7 @@ import web
 import json
 from hclient import HClient
 from pymongo import MongoClient
+from realtime import StreamFixedQueue
 
 urls = (
     '/', 'Static',
@@ -21,7 +22,10 @@ class Static:
 class Realtime:
 
 	def GET(self):
-		return "realtime stream"
+		stream = StreamFixedQueue.Instance()
+		
+		results = {"results": stream.getSample()}
+		return json.dumps(results)
 	
 	def POST(self):
 		return self.GET()	
@@ -72,6 +76,7 @@ class REST:
 		self.GET()
 
 def run():
+	StreamFixedQueue.Instance().start()
 	app = web.application(urls, globals())
 	app.internalerror = web.debugerror
 	app.run()
