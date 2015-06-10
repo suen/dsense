@@ -6,6 +6,7 @@ from pymongo import MongoClient
 urls = (
     '/', 'Static',
     '/rest', 'REST',
+    '/realtime', 'Realtime',
 )
 
 render = web.template.render("static")
@@ -16,6 +17,14 @@ class Static:
 	
 	def POST(self):
 		pass
+
+class Realtime:
+
+	def GET(self):
+		return "realtime stream"
+	
+	def POST(self):
+		return self.GET()	
 
 class REST:        
 	def GET(self):
@@ -39,10 +48,10 @@ class REST:
 		for result in resultquery['result']:
 			model = result['model']
 			
-			cursor = mgclient.find({"topic.model": model}, {"text":1})
+			cursor = mgclient.find({"topic.model": model}, {"text":1, "topic": 1})
 			for d in cursor:
 				doc = d['text']
-				print doc
+				score = d['topic'][model]
 				tweets.append(doc)
 
 		print tweets
