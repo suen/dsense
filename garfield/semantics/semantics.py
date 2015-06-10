@@ -28,6 +28,12 @@ class LDAModel:
 	def initialize(self):
 		self.lda = models.LdaModel(id2word=self.dictionary, num_topics=200) 
 	
+	def saveModel(self, filename):
+		self.lda.save(filename)
+	
+	def loadFromFile(self, filename):
+		self.lda = self.lda.load(filename)
+	
 	def trainModel(self, stream):
 		#tfidf = models.TfidfModel(docs);
 		#self.corpus_tfidf = tfidf[docs]
