@@ -5,6 +5,7 @@ app.controller('mainController', ['$scope', '$http', function($scope, $http){
 
 	$scope.resultset = []
 	$scope.query = ""
+	$scope.stream = []
 	$scope.queryInProcess = false;
 
     $scope.submitQuery = function(){
@@ -26,6 +27,19 @@ app.controller('mainController', ['$scope', '$http', function($scope, $http){
 			console.err("GET failed")
 		});
     };
+
+	$scope.queryrealtime = function() {
+		$http.get("/realtime").success(function(data) {
+			if (data['results'].length != 0) {
+				$scope.stream = data['results']
+			}
+			console.log(data)
+		}).error(function(){
+			console.err("Realtime stream failed");
+		});
+	};
+
+	setInterval($scope.queryrealtime, 1000);
 
 }]);
 

@@ -43,12 +43,20 @@
 
 			<div class="container">
 				<div class="row">
-					<h3>{{ resultset.length == 0 ? "Type in a query" : "Result" }}</h3>
-					<h4>{{ queryInProcess ? " Please wait..." : "" }}</h4>
-					<div class="col-xs-9">
+					<div class="col-xs-7">
+						<h3>{{ resultset.length == 0 ? "Type in a query" : "Result" }}</h3>
+						<h4>{{ queryInProcess ? " Please wait..." : "" }}</h4>
 						<table class="table">
 							<tr ng-repeat=" r in resultset ">
 								<td>{{ r }}</td>
+							</tr>
+						</table>
+					</div>
+					<div class="cols-xs-5" style="float: right; width: 400px; background:#dfdfdf; border: 1px solid #1f1f1f;">
+						<h3 style="padding: 10px 10px 10px 10px; background: #2F4F4F; color: #ffffff;margin: 0px;">Stream Sample Realtime</h3>
+						<table class="table" style="width:400px;">
+							<tr ng-repeat=" r in stream ">
+								<td>{{ r['text'] }}</td>
 							</tr>
 						</table>
 					</div>
