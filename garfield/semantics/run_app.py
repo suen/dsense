@@ -2,6 +2,7 @@ from semantics import SuperDictionary, TwitterMiniBatch, LDAModel
 from datastream import FeedListener
 import http, time
 from threading import Thread
+from dictionary import WrapperDictionary
 
 
 class Main:
@@ -16,14 +17,16 @@ class Main:
 		http.run()
 	
 	def run(self):
-		sdict = SuperDictionary()
+		#sdict = SuperDictionary()
+		wdict = WrapperDictionary.Instance()
+		wdict.init(1000)
 		tmb = TwitterMiniBatch()
 
-		tmb.setDictionary(sdict.dictionary)
+		tmb.setDictionary(wdict)
 
 		self.model = LDAModel.Instance()
 		self.model.setName("model1")
-		self.model.setDictionary(sdict.dictionary)
+		self.model.setDictionary(wdict)
 		self.model.initialize()
 
 		#print self.model.show_topics(20)
@@ -37,7 +40,7 @@ class Main:
 
 		b = 1
 		while True:
-			time.sleep(1)
+			time.sleep(0.001)
 			if not tmb.hasData():
 				continue
 
