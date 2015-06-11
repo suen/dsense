@@ -48,22 +48,22 @@ class REST:
 		querytopics = resultquery['result']
 		print querytopics
 
-		tweets = []
+		tweets = set() 
 		for result in resultquery['result']:
 			model = result['model']
 			
 			cursor = mgclient.find({"topic.model": model}, {"text":1, "topic": 1})
 			for d in cursor:
 				doc = d['text']
-				score = d['topic'][model]
-				tweets.append(doc)
+				#score = d['topic'][model]
+				tweets.add(doc)
 
 		print tweets
 
 		results = {"results": ["This is tweet1", "Tweet 2 is here",
 							"Tweet 3 is here", "There is sth here" ] }
 
-		results = {"results": tweets}
+		results = {"results": list(tweets)}
 
 		return json.dumps(results) 
 

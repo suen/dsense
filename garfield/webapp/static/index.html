@@ -31,7 +31,7 @@
 					<h1>dSense</h1>
 					<div style="clear:both;margin: 0px auto;">
 						<form class="form-inline">
-							<input type="text" class="form-control input-lg" style="width: 500px" ng-model="query" placeholder="query">
+							<input type="text" class="form-control input-lg" style="width: 500px" ng-model="query" placeholder="Type in a query">
 							<button class="btn btn-primary btn-lg" ng-click="submitQuery()" >Query</button>
 						</form>
 					</div>
@@ -44,13 +44,20 @@
 			<div class="container">
 				<div class="row">
 					<div class="col-xs-7">
-						<h3>{{ resultset.length == 0 ? "Type in a query" : "Result" }}</h3>
+						<h3>{{ resultset.length == 0 ? "" : "Result" }}</h3>
 						<h4>{{ queryInProcess ? " Please wait..." : "" }}</h4>
+						<h4>{{ error != "" ? error : "" }}</h4>
+						<ul ng-repeat=" r in resultset ">
+							<li> {{ r }}</li>
+						</ul>
+						<p> {{ (resultset.length == 0 && !queryInProcess && noresult ) ? "No results for : '" + executedquery + "'" : "" }} </p>
+						<!--
 						<table class="table">
 							<tr ng-repeat=" r in resultset ">
 								<td>{{ r }}</td>
 							</tr>
 						</table>
+						-->
 					</div>
 					<div class="cols-xs-5" style="float: right; width: 400px; background:#dfdfdf; border: 1px solid #1f1f1f;">
 						<h3 style="padding: 10px 10px 10px 10px; background: #2F4F4F; color: #ffffff;margin: 0px;">Stream Sample Realtime</h3>

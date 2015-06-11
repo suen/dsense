@@ -3,28 +3,46 @@ var app = angular.module('dsense', []);
 
 app.controller('mainController', ['$scope', '$http', function($scope, $http){
 
-	$scope.resultset = []
-	$scope.query = ""
-	$scope.stream = []
+	$scope.resultset = [];
+	$scope.query = "";
+	$scope.stream = [];
 	$scope.queryInProcess = false;
+	$scope.noresult = false;
+	$scope.executedquery = "";
+	$scope.error = "";
 
     $scope.submitQuery = function(){
+		
+		$scope.firstrun = false;
+		$scope.executedquery = "";
 		
 		if ($scope.query == "")
 			return;
 
 		param = { query : $scope.query }
 
-		$scope.queryInProcess = true 
+		$scope.queryInProcess = true ;
 
-		$scope.resultset = []
+		$scope.resultset = [];
         $http.get("/rest", {params: param } ).success(function(data){ 
-			console.log("GET query="+ $scope.query) 
-			console.log("Result : " + data)
-			$scope.resultset = data['results']
-			$scope.queryInProcess = false
+			console.log("GET query="+ $scope.query);
+			console.log(data);
+			
+			$scope.resultset = data['results'];
+			$scope.queryInProcess = false;
+
+			if (data['results'].length == 0)
+				$scope.noresult = true;
+			else
+				$scope.noresult = false;
+
+			$scope.executedquery = $scope.query;
+				
 		}).error(function() {
 			console.err("GET failed")
+			$scope.queryInProcess = false;
+			$scope.executedquery = $scope.query;
+			$scope.error = "Server request failed";
 		});
     };
 
@@ -33,13 +51,13 @@ app.controller('mainController', ['$scope', '$http', function($scope, $http){
 			if (data['results'].length != 0) {
 				$scope.stream = data['results']
 			}
-			console.log(data)
+			//console.log(data)
 		}).error(function(){
 			console.err("Realtime stream failed");
 		});
 	};
 
-	setInterval($scope.queryrealtime, 1000);
+	setInterval($scope.queryrealtime, 2000);
 
 }]);
 
