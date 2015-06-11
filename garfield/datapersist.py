@@ -27,12 +27,14 @@ class FeedPersistence:
 		self.persistThread.start()
 	
 	def persist(self):
+		written = 0
 		while True:
 			if len(self.buffer) > 1:
 				packet = self.buffer[0]
 				for p in packet:
 					self.mg.insert(p)
-				print str(len(packet)) + " written"
+				written += len(packet)
+				print str(written) + " written"
 				self.buffer = self.buffer[1:]
 			else:
 				time.sleep(1)
