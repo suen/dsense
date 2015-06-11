@@ -1,8 +1,10 @@
 from gensim import corpora
 from six import PY3, iteritems, iterkeys, itervalues, string_types
+from patterns import Singleton
 
+@Singleton
 class WrapperDictionary:
-	def __init__(self, size):
+	def init(self, size):
 		self.super = corpora.Dictionary()
 		self.token2id = self.super.token2id
 		self.id2token = self.super.id2token
@@ -16,6 +18,7 @@ class WrapperDictionary:
 		self.size = size
 		self.numlist = self.createNumberList(size)
 		self.super.add_documents([self.numlist])
+		print "Wrapper Dictionary initialized"
 	
 	def createNumberList(self, upperbound):
 		strnum = []
