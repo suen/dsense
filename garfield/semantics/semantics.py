@@ -8,11 +8,6 @@ from datastream import FeedListener
 import web 
 from patterns import Singleton
 
-class SuperDictionary:
-	def __init__(self):
-		words = [ x.strip() for x in open("dictnostops.txt").readlines() ]
-		self.dictionary = corpora.Dictionary()
-		self.dictionary.add_documents([words])
 
 @Singleton
 class LDAModel:
