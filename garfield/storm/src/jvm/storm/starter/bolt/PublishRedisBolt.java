@@ -31,8 +31,20 @@ public class PublishRedisBolt extends BaseBasicBolt{
 	@Override
 	public void execute(Tuple input, BasicOutputCollector collector) {
 		Rankings rank = (Rankings)input.getValue(0);
-		Jedis jedisServer = new Jedis(host,port);
-		jedisServer.publish(nameStream,rank.toString());
+		try{
+			Jedis jedisServer = new Jedis(host,port);
+			String result = rank.toString();
+			result = result.replaceAll("\\[","");
+			result = result.replaceAll("\\]","");
+			String[] tabResultRank = result.split(",");
+			for(int i = 0; i < tabResultRank.length;i++){
+				String[] tabResult = tabResultRank[i].split("\\|");
+				String json = "{'word' : " + tabResult[0] + ",'count' : " + tabResult[1] + "}";
+				jedisServer.publish("result",json);
+			}
+		}catch(ArrayIndexOutOfBoundsException e){
+			//do nothing
+		}
 		collector.emit(new Values("nothing"));
 	}
 		
