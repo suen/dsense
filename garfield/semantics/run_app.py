@@ -35,7 +35,7 @@ class Main:
 		#self.model = LDAModel("model1", sdict.dictionary)
 
 		streamfeed = FeedListener()
-		streamfeed.setDataHandler(tmb)
+		streamfeed.setStreamHandler(tmb)
 		streamfeed.startListen()
 
 		b = 1

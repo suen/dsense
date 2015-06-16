@@ -7,20 +7,32 @@ class FeedListener:
 
 	def __init__(self):
 		self.r = redis.StrictRedis()
-		self.p = self.r.pubsub()
-		self.p.subscribe("twitter-feed")
+		self.streamchannel = self.r.pubsub()
+		self.streamchannel.subscribe("twitter-stream")
+
+		self.feedbackchannel = self.r.pubsub()
+		self.feedbackchannel.subscribe("topwords")
+
 		self.handler = None
 		
-		print "====", self.p.get_message()
+		print "====", self.streamchannel.get_message()
+		print "====", self.feedbackchannel.get_message()
 
-		self.dataThread = Thread(target=self.listen)
-		self.dataThread.setDaemon(True)
+		self.streamThread = Thread(target=self.listenStream)
+		self.streamThread.setDaemon(True)
 
-	def setDataHandler(self, handler):
-		self.handler = handler
+		self.feedbackThread = Thread(target=self.listenFeedback)
+		self.feedbackThread.setDaemon(True)
+
+	def setStreamHandler(self, handler):
+		self.streamHandler = handler
+
+	def setFeedbackHandler(self, handler):
+		self.feedbackHandler = handler
 
 	def startListen(self):
-		self.dataThread.start()
+		self.streamThread.start()
+		self.feedbackThread.start()
 	
 	def publish(self, msg):
 		if isinstance(msg, list):
@@ -33,19 +45,35 @@ class FeedListener:
 			print "INFO: 1 tweet published"
 		
 
-	def listen(self):
+	def listenStream(self):
 		while True:
-			msg = self.p.get_message()
+			msg = self.streamchannel.get_message()
 			if msg == None:
-				time.sleep(1)
+				time.sleep(0.1)
 				continue
 			if not isinstance(msg['data'],str): 
 				print type(msg['data'])
 				print msg
 				continue
-			if self.handler is not None:
+			if self.streamHandler is not None:
 				msg = json.loads(str(msg['data']))
-				self.handler.feed(msg)
+				self.streamHandler.feed(msg)
+			else:
+				print msg['data'] 
+
+	def listenFeedback(self):
+		while True:
+			msg = self.feedbackchannel.get_message()
+			if msg == None:
+				time.sleep(0.1)
+				continue
+			if not isinstance(msg['data'],str): 
+				print type(msg['data'])
+				print msg
+				continue
+			if self.feedbackHandler is not None:
+				msg = json.loads(str(msg['data']))
+				self.feedbackHandler.feedback(msg)
 			else:
 				print msg['data'] 
 
@@ -56,10 +84,15 @@ class HandlerTest:
 	def feed(self,msg):
 		print len(str(msg)), " chars feed"	
 	
+	def feedback(self, msg):
+		print "Feedback : " + str(msg)
+	
 if __name__ == "__main__":
 	h = HandlerTest()
 	d = FeedListener()
-	d.setDataHandler(h)
+	d.setStreamHandler(h)
+	d.setFeedbackHandler(h)
 	d.startListen()
 	
-	d.dataThread.join()
+	d.feedbackThread.join()
+	d.streamThread.join()
