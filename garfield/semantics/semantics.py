@@ -9,7 +9,6 @@ import web
 from patterns import Singleton
 
 
-@Singleton
 class LDAModel:
 	def __init__(self):
 		pass

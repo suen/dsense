@@ -8,7 +8,6 @@ class SuperDictionary:
 		self.dictionary = corpora.Dictionary()
 		self.dictionary.add_documents([words])
 
-@Singleton
 class WrapperDictionary:
 	def init(self, size):
 		self.super = corpora.Dictionary()
