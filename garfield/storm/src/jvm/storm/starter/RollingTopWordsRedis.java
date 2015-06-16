@@ -17,11 +17,23 @@
  */
 package storm.starter;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import backtype.storm.Config;
 import backtype.storm.testing.TestWordSpout;
 import backtype.storm.topology.TopologyBuilder;
 import backtype.storm.tuple.Fields;
+
 import org.apache.log4j.Logger;
+
+import com.twitter.chill.Base64.InputStream;
+
 import storm.starter.bolt.IntermediateRankingsBolt;
 import storm.starter.bolt.RollingCountBolt;
 import storm.starter.bolt.TotalRankingsBolt;
@@ -44,7 +56,7 @@ public class RollingTopWordsRedis {
 
   private static final Logger LOG = Logger.getLogger(RollingTopWordsRedis.class);
   private static final int DEFAULT_RUNTIME_IN_SECONDS = 60;
-  private static final int TOP_N = 5;
+  private static final int TOP_N = 200;
 
   private final TopologyBuilder builder;
   private final String topologyName;
@@ -68,13 +80,39 @@ public class RollingTopWordsRedis {
 
 	public static class WordSplitterBolt extends BaseBasicBolt{
 	
+		List<String> stopwords = new ArrayList<String>();
+		
+		
+		public WordSplitterBolt(){
+			try {
+				File file = new File("./stopword.txt");
+				FileReader fr = new FileReader("./stopword.txt");
+				BufferedReader br = new BufferedReader(fr);
+				
+				String line = br.readLine();
+				while( line != null ){
+					stopwords.add(line.toLowerCase().trim());
+					line = br.readLine();
+				}
+
+				System.out.println("==================== SIZE : " + stopwords.size() + "=============");
+				System.out.println("====first word : " + stopwords.get(0));
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+		}
+		
 		@Override
 		public void execute(Tuple input, BasicOutputCollector collector) {
 			String sentence = input.getString(0);
 			String[] words = sentence.split(" ");
 			for(String word: words){
 				word = word.trim();
-				if(!word.isEmpty()){
+				word = word.replace("!", "").replace("(", "").replace(")", "");
+				if(!word.isEmpty() && word.length() > 3  && !stopwords.contains(word)){
 					word = word.toLowerCase();
 					collector.emit(new Values(word));
 				}
