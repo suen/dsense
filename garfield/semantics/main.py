@@ -1,10 +1,11 @@
-from semantics import SuperDictionary, TwitterMiniBatch, LDAModel
+from semantics import TwitterMiniBatch, LDAModel
 from datastream import FeedListener
 import http, time
 from threading import Thread
 from dictionary import WrapperDictionary
+from patterns import Singleton
 
-
+@Singleton
 class Main:
 	def __init__(self):
 		self.model = None
@@ -16,26 +17,33 @@ class Main:
 	def starthttp(self):
 		http.run()
 	
+	def feedback(self, msg):
+		print "Feedback "
+		print msg
+		pass
+	
 	def run(self):
 		#sdict = SuperDictionary()
-		wdict = WrapperDictionary.Instance()
+		wdict = WrapperDictionary()
 		wdict.init(1000)
 		tmb = TwitterMiniBatch()
 
 		tmb.setDictionary(wdict)
 
-		self.model = LDAModel.Instance()
+		self.model = LDAModel()
 		self.model.setName("model1")
 		self.model.setDictionary(wdict)
 		self.model.initialize()
 
 		#print self.model.show_topics(20)
 		print self.model
+		#print self.model.lda
 
 		#self.model = LDAModel("model1", sdict.dictionary)
 
 		streamfeed = FeedListener()
 		streamfeed.setStreamHandler(tmb)
+		streamfeed.setFeedbackHandler(self)
 		streamfeed.startListen()
 
 		b = 1
@@ -59,5 +67,5 @@ class Main:
 
 	
 if __name__ == "__main__":
-	main = Main()
+	main = Main.Instance()
 	main.run()
