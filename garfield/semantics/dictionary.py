@@ -19,7 +19,7 @@ class WrapperDictionary:
 		self.num_nnz = self.super.num_nnz
 
 		self.index = 0
-		self.prefix = "uzumymw"
+		self.prefix = "abcdefgh"
 		self.size = size
 		self.numlist = self.createNumberList(size)
 		self.super.add_documents([self.numlist])

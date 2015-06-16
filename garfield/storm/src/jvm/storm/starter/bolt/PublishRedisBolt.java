@@ -18,9 +18,9 @@ import redis.clients.jedis.Jedis;
 import storm.starter.tools.Rankings;
 
 public class PublishRedisBolt extends BaseBasicBolt{
-	String host;
-	int port;
-	String nameStream;
+	private String host;
+	private int port;
+	private String nameStream;
 	
 	public PublishRedisBolt(String host,int port,String nameStream){
 		this.host = host;
@@ -39,8 +39,8 @@ public class PublishRedisBolt extends BaseBasicBolt{
 			String[] tabResultRank = result.split(",");
 			for(int i = 0; i < tabResultRank.length;i++){
 				String[] tabResult = tabResultRank[i].split("\\|");
-				String json = "{'word' : " + tabResult[0] + ",'count' : " + tabResult[1] + "}";
-				jedisServer.publish("result",json);
+				String json = "{\"word\": \"" + tabResult[0] + "\",\"count\": \"" + tabResult[1] + "\"}";
+				jedisServer.publish(nameStream,json);
 			}
 		}catch(ArrayIndexOutOfBoundsException e){
 			//do nothing

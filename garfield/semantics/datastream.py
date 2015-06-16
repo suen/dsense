@@ -37,12 +37,12 @@ class FeedListener:
 	def publish(self, msg):
 		if isinstance(msg, list):
 			for m in msg:
-				self.r.publish("twitter-persist", json.dumps(m) )
+				self.r.publish("twitter-postmodel", json.dumps(m) )
 			msgsize = len(msg)
-			print "INFO: " + str(msgsize) + " tweets published"
+			#print "INFO: " + str(msgsize) + " tweets published"
 		else:
-			self.r.publish("twitter-persist", json.dumps(msg) )
-			print "INFO: 1 tweet published"
+			self.r.publish("twitter-postmodel", json.dumps(msg) )
+			#print "INFO: 1 tweet published"
 		
 
 	def listenStream(self):
@@ -72,8 +72,12 @@ class FeedListener:
 				print msg
 				continue
 			if self.feedbackHandler is not None:
-				msg = json.loads(str(msg['data']))
-				self.feedbackHandler.feedback(msg)
+				try:
+					msg = json.loads(str(msg['data']))
+					self.feedbackHandler.feedback(msg)
+				except:
+					print "Exception"
+					print msg['data']
 			else:
 				print msg['data'] 
 

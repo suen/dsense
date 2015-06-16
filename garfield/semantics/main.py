@@ -1,14 +1,15 @@
-from semantics import TwitterMiniBatch, LDAModel
+from semantics import TwitterMiniBatch, LDAModel, ModelDict
 from datastream import FeedListener
 import http, time
 from threading import Thread
-from dictionary import WrapperDictionary
 from patterns import Singleton
 
 @Singleton
 class Main:
 	def __init__(self):
 		self.model = None
+
+		self.words = []
 
 		self.httpThread = Thread(target=self.starthttp)
 		self.httpThread.setDaemon(True)
@@ -18,28 +19,31 @@ class Main:
 		http.run()
 	
 	def feedback(self, msg):
-		print "Feedback "
-		print msg
-		pass
+		word = msg['word'].lower().strip()
+
+		if word in self.words:
+			return;
+
+		self.words.append(word)
+
+		self.dict.add_word(word)
+		print "'%s' added"%word
+		return
 	
 	def run(self):
-		#sdict = SuperDictionary()
-		wdict = WrapperDictionary()
-		wdict.init(1000)
-		tmb = TwitterMiniBatch()
 
-		tmb.setDictionary(wdict)
+		modelDict = ModelDict.Instance()
+		modelDict.init("model1", 1000)
 
-		self.model = LDAModel()
-		self.model.setName("model1")
-		self.model.setDictionary(wdict)
-		self.model.initialize()
+		self.model = modelDict.model
+		self.dict = modelDict.dict
 
 		#print self.model.show_topics(20)
 		print self.model
 		#print self.model.lda
 
-		#self.model = LDAModel("model1", sdict.dictionary)
+		tmb = TwitterMiniBatch(100)
+		tmb.setDictionary(self.dict)
 
 		streamfeed = FeedListener()
 		streamfeed.setStreamHandler(tmb)
@@ -52,18 +56,15 @@ class Main:
 			if not tmb.hasData():
 				continue
 
-			print "=========Batch " + str(b) + "=========="
 			self.model.trainModel(tmb)
 
 			enr = tmb.enrichDoc(self.model)
 			
 			streamfeed.publish(enr)
 
-			print str(len(enr)) + " enriched "
-
 			tmb.queuePop()
 			b += 1
-			print "================== "
+			print "Model Updated, Doc count : %d "%(b*tmb.buffersize)
 
 	
 if __name__ == "__main__":

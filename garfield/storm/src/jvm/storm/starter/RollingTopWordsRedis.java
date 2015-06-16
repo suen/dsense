@@ -102,7 +102,7 @@ public class RollingTopWordsRedis {
 		}
 
 		
-		String[] symbols = "! ? , . & ( ) { } : ;".split(" ");
+		String[] symbols = "! ? , . & ( ) { } ' \\ \" : ;".split(" ");
 		
 		public String filter(String word){
 			word = word.trim();

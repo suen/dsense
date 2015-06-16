@@ -1,7 +1,6 @@
 import web
-from semantics import LDAModel 
+from semantics import ModelDict 
 import json
-from dictionary import WrapperDictionary
 
 urls = (
     '/', 'REST',
@@ -16,7 +15,7 @@ class REST:
 		topics = param.getTopics
 		dictionary = param.getDictionary
 		if query != "":
-			model = LDAModel.Instance()
+			model = ModelDict.Instance().model
 			topics = model.textquery(query)
 
 			result = {"result": topics}
@@ -24,7 +23,7 @@ class REST:
 			return json.dumps(result) 
 
 		if topics != "":
-			model = LDAModel.Instance()
+			model = ModelDict.Instance().model
 			topiclist = model.show_topics(int(topics)) 
 			
 			result = {"result": topiclist}
@@ -32,7 +31,7 @@ class REST:
 			return json.dumps(result) 
 
 		if dictionary != "":
-			map = WrapperDictionary.Instance().token2id
+			map = ModelDict.Instance().dict.token2id
 			result = {"result": map}
 
 			return json.dumps(result) 
@@ -51,10 +50,10 @@ class Feedback:
 		if word != "":
 			words = [ x.strip() for x in open("top1000.txt").readlines() ]
 			for w in words:
-				WrapperDictionary.Instance().add_word(w)
+				Main.Instance().wdict.add_word(w)
 			return "OK"
 
-			response = WrapperDictionary.Instance().add_word(word)
+			response = Main.Instance().wdict.add_word(word)
 			if response:
 				return "OK"
 			else:
