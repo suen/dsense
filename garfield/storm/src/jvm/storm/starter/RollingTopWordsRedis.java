@@ -25,27 +25,23 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import backtype.storm.Config;
-import backtype.storm.testing.TestWordSpout;
-import backtype.storm.topology.TopologyBuilder;
-import backtype.storm.tuple.Fields;
-
 import org.apache.log4j.Logger;
 
-import com.twitter.chill.Base64.InputStream;
-
 import storm.starter.bolt.IntermediateRankingsBolt;
+import storm.starter.bolt.PublishRedisBolt;
 import storm.starter.bolt.RollingCountBolt;
 import storm.starter.bolt.TotalRankingsBolt;
-import storm.starter.util.StormRunner;
 import storm.starter.spout.RedisPubSubSpout;
-import backtype.storm.topology.base.BaseBasicBolt;
-import backtype.storm.tuple.Tuple;
-import backtype.storm.tuple.Values;
+import storm.starter.util.StormRunner;
+import backtype.storm.Config;
+import backtype.storm.LocalCluster;
 import backtype.storm.topology.BasicOutputCollector;
 import backtype.storm.topology.OutputFieldsDeclarer;
-import storm.starter.bolt.PublishRedisBolt;
-import backtype.storm.LocalCluster;
+import backtype.storm.topology.TopologyBuilder;
+import backtype.storm.topology.base.BaseBasicBolt;
+import backtype.storm.tuple.Fields;
+import backtype.storm.tuple.Tuple;
+import backtype.storm.tuple.Values;
 
 /**
  * This topology does a continuous computation of the top N words that the topology has seen in terms of cardinality.
@@ -104,15 +100,29 @@ public class RollingTopWordsRedis {
 			}
 			
 		}
+
 		
+		String[] symbols = "! ? , . & ( ) { } : ;".split(" ");
+		
+		public String filter(String word){
+			word = word.trim();
+			for (String sym: symbols){
+				word = word.replace(sym, "");
+			}
+			if ( word.length() < 3  || stopwords.contains(word))
+				return "";
+			
+			return word;
+		}
+		
+
 		@Override
 		public void execute(Tuple input, BasicOutputCollector collector) {
 			String sentence = input.getString(0);
 			String[] words = sentence.split(" ");
 			for(String word: words){
-				word = word.trim();
-				word = word.replace("!", "").replace("(", "").replace(")", "");
-				if(!word.isEmpty() && word.length() > 3  && !stopwords.contains(word)){
+				word = filter(word);
+				if(!word.isEmpty() ){
 					word = word.toLowerCase();
 					collector.emit(new Values(word));
 				}
@@ -130,13 +140,13 @@ public class RollingTopWordsRedis {
     String counterId = "counter";
     String intermediateRankerId = "intermediateRanker";
     String totalRankerId = "finalRanker";
-    builder.setSpout("spout", new RedisPubSubSpout("localhost",6379,"tweet"), 1);
+    builder.setSpout("spout", new RedisPubSubSpout("localhost",6379,"twitter-stream"), 1);
     builder.setBolt("splitter", new WordSplitterBolt(),3).shuffleGrouping("spout");
 	builder.setBolt(counterId, new RollingCountBolt(9, 3), 4).fieldsGrouping("splitter", new Fields("word"));
     builder.setBolt(intermediateRankerId, new IntermediateRankingsBolt(TOP_N), 4).fieldsGrouping(counterId, new Fields(
         "obj"));
     builder.setBolt(totalRankerId, new TotalRankingsBolt(TOP_N)).globalGrouping(intermediateRankerId);
-  	builder.setBolt("publish", new PublishRedisBolt("localhost",6379,"result")).globalGrouping(totalRankerId);
+  	builder.setBolt("publish", new PublishRedisBolt("localhost",6379,"topwords")).globalGrouping(totalRankerId);
   }
 
   public void runLocally() throws InterruptedException {
