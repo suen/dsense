@@ -6,4 +6,4 @@
 *.ini
 *.swp*
 .*
-
+./garfield/storm/target/*
