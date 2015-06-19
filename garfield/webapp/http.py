@@ -25,7 +25,7 @@ class Realtime:
 	def GET(self):
 		stream = StreamFixedQueue.Instance()
 		
-		results = {"results": stream.getSample()}
+		results = {"results": stream.getSample(), "topwords": stream.getTopwords()}
 		return json.dumps(results)
 	
 	def POST(self):
@@ -52,7 +52,7 @@ class REST:
 		tweets = set() 
 		for result in resultquery['result']:
 			model = result['model']
-			cursor = mgclient.find({"topic": {"$elemMatch": { "model": model, "score": {"$gte" : 0.60 }} }}, {"topic.$":1, "text": 1}).sort("topic.score", pymongo.DESCENDING).limit(30)
+			cursor = mgclient.find({"topic": {"$elemMatch": { "model": model, "score": {"$gte" : 0.10 }} }}, {"topic.$":1, "text": 1}).sort("topic.score", pymongo.DESCENDING).limit(30)
 			#cursor = mgclient.find({"topic.model": model}, {"text":1, "topic": 1})
 			for d in cursor:
 				doc = d['text']

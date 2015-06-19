@@ -10,6 +10,16 @@
         <link rel="stylesheet" href="static/bower_components/bootstrap/dist/css/bootstrap.min.css">
         <link rel="stylesheet" href="static/bower_components/bootstrap-fileinput/css/fileinput.min.css">
 		<style>
+			.list-inline {
+				list-style: none;
+				display: inline;
+				padding: 0px;
+				margin: 0px;
+			}
+			.list-inline li {
+				margin-right: 10px;
+				margin-bottom: 5px;
+			}
 		</style>
 
 		<script src="static/bower_components/jquery/dist/jquery.min.js"></script>
@@ -23,7 +33,7 @@
 		<script src="js/service.js"></script>
 		-->
     </head>
-    <body>
+    <body style="background: #efefef;">
 		<div class="container" ng-app="dsense" ng-controller="mainController">
 			<nav class="navbar">
 			<div class="container-fluid">
@@ -42,6 +52,13 @@
 			<div></div>
 
 			<div class="container">
+				<div class="row">
+					<div class="col-xs-7">
+						<ul class="list-inline">
+							<li ng-repeat="t in topwords">{{ t['word'] + "(" + t['count'] + ")" }}</li>
+						</ul>
+					</div>
+				</div>
 				<div class="row">
 					<div class="col-xs-7">
 						<h3>{{ resultset.length == 0 ? "" : "Result" }}</h3>

@@ -9,19 +9,28 @@ class FeedListener:
 	def __init__(self):
 		self.r = redis.StrictRedis()
 		self.p = self.r.pubsub()
-		self.p.subscribe("twitter-persist")
+		self.p.subscribe("twitter-stream")
+
+		self.p2 = self.r.pubsub()
+		self.p2.subscribe("topwords")
+
 		self.handler = None
 		
 		print "====", self.p.get_message()
+		print "====", self.p2.get_message()
 
 		self.dataThread = Thread(target=self.listen)
 		self.dataThread.setDaemon(True)
 
+		self.topwordThread = Thread(target=self.listenTopWords)
+		self.topwordThread.setDaemon(True)
+
 	def setDataHandler(self, handler):
 		self.handler = handler
-
+	
 	def startListen(self):
 		self.dataThread.start()
+		self.topwordThread.start()
 	
 	def listen(self):
 		while True:
@@ -39,6 +48,26 @@ class FeedListener:
 			else:
 				print msg['data'] 
 
+	def listenTopWords(self):
+		while True:
+			msg = self.p2.get_message()
+			if msg == None:
+				time.sleep(1)
+				continue
+			if not isinstance(msg['data'],str): 
+				print type(msg['data'])
+				print msg
+				continue
+			if self.handler is not None:
+				try:
+					msg = json.loads(msg['data'].replace("\n", ""))
+					self.handler.feedTopWords(msg)
+				except:
+					print msg
+					print "JSON casting exception"
+			else:
+				print msg['data'] 
+
 @Singleton
 class StreamFixedQueue:
 	def __init__(self):
@@ -47,6 +76,9 @@ class StreamFixedQueue:
 		self.buffer = []
 		self.size = 10
 
+		self.topwords = []
+		self.tsize = 20
+
 	def start(self):
 		self.listener.startListen()
 	
@@ -54,6 +86,14 @@ class StreamFixedQueue:
 		self.buffer.append(msg)
 		if len(self.buffer) > self.size: 
 			self.buffer = self.buffer[1:]
+	
+	def feedTopWords(self, word):
+		self.topwords.append(word)
+		if len(self.topwords) > self.tsize:
+			self.topwords = self.topwords[1:]
+
+	def getTopwords(self):
+		return self.topwords
 	
 	def getSample(self):
 		return self.buffer

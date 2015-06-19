@@ -4,6 +4,7 @@ var app = angular.module('dsense', []);
 app.controller('mainController', ['$scope', '$http', function($scope, $http){
 
 	$scope.resultset = [];
+	$scope.topwords = [];
 	$scope.query = "";
 	$scope.stream = [];
 	$scope.queryInProcess = false;
@@ -51,6 +52,7 @@ app.controller('mainController', ['$scope', '$http', function($scope, $http){
 			if (data['results'].length != 0) {
 				$scope.stream = data['results']
 			}
+			$scope.topwords = data['topwords'];
 			//console.log(data)
 		}).error(function(){
 			console.err("Realtime stream failed");
