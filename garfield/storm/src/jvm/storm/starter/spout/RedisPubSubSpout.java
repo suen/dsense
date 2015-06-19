@@ -6,16 +6,17 @@ import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.log4j.Logger;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisPubSub;
-
 import backtype.storm.spout.SpoutOutputCollector;
 import backtype.storm.task.TopologyContext;
-import backtype.storm.topology.base.BaseRichSpout;
 import backtype.storm.topology.OutputFieldsDeclarer;
+import backtype.storm.topology.base.BaseRichSpout;
 import backtype.storm.tuple.Fields;
 import backtype.storm.utils.Utils;
 
@@ -115,7 +116,13 @@ public class RedisPubSubSpout extends BaseRichSpout {
         if(ret==null) {
             Utils.sleep(50);
         } else {
-            _collector.emit(tuple(ret));            
+        	
+        	try {
+				JSONObject json = new JSONObject(ret);
+	            _collector.emit(tuple(json.get("text")));            
+			} catch (JSONException e) {
+				System.out.println("JSON Exception");
+			}
         }
 	}
 

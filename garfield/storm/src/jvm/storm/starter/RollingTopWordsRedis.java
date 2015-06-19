@@ -24,6 +24,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
@@ -52,7 +53,7 @@ public class RollingTopWordsRedis {
 
   private static final Logger LOG = Logger.getLogger(RollingTopWordsRedis.class);
   private static final int DEFAULT_RUNTIME_IN_SECONDS = 60;
-  private static final int TOP_N = 200;
+  private static final int TOP_N = 20;
 
   private final TopologyBuilder builder;
   private final String topologyName;
@@ -104,12 +105,21 @@ public class RollingTopWordsRedis {
 		
 		String[] symbols = "! ? , . & ( ) { } ' \\ \" : ;".split(" ");
 		
+		Pattern escape = Pattern.compile("[\\!\\?\\,\\.\\&\\(\\)\\{\\}\\'\\\\\\\"\\:\\;]");
+		
 		public String filter(String word){
 			word = word.trim();
-			for (String sym: symbols){
-				word = word.replace(sym, "");
-			}
-			if ( word.length() < 3  || stopwords.contains(word))
+//			for (String sym: symbols){
+//				word = word.replaceAll(sym, "");
+//				
+//			}
+			
+			word = word.replaceAll(escape.pattern(), "");
+			
+			if ( word.length() < 3  
+					|| word.contains("http")
+					|| (word.charAt(0) >= 48 && word.charAt(0) <= 57)
+					|| stopwords.contains(word) )
 				return "";
 			
 			return word;

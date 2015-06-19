@@ -40,6 +40,8 @@ public class PublishRedisBolt extends BaseBasicBolt{
 			for(int i = 0; i < tabResultRank.length;i++){
 				String[] tabResult = tabResultRank[i].split("\\|");
 				String json = "{\"word\": \"" + tabResult[0] + "\",\"count\": \"" + tabResult[1] + "\"}";
+				
+				//String json = tabResult[0] + ":" + tabResult[1];
 				jedisServer.publish(nameStream,json);
 			}
 		}catch(ArrayIndexOutOfBoundsException e){
