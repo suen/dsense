@@ -9,7 +9,7 @@ class FeedPersistence:
 		self.mg = MongoClient().twitter.warehouse
 		self.r = redis.StrictRedis()
 		self.p = self.r.pubsub()
-		self.p.subscribe("twitter-persist")
+		self.p.subscribe("twitter-postmodel")
 		self.handler = None
 
 		self.listenThread = Thread(target=self.listen)
