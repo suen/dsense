@@ -51,6 +51,7 @@ class Main:
 		streamfeed.startListen()
 
 		b = 1
+		lasttime = time.time()
 		while True:
 			time.sleep(0.001)
 			if not tmb.hasData():
@@ -64,7 +65,14 @@ class Main:
 
 			tmb.queuePop()
 			b += 1
-			print "Model Updated, Doc count : %d "%(b*tmb.buffersize)
+
+			thistime = time.time()
+			deltatime = thistime - lasttime
+			rate = tmb.buffersize / deltatime
+
+			print "Buffer size: %d, Tweet count : %d, Rate: %d tweets/s"%(tmb.buffersize, b*tmb.buffersize, rate)
+
+			lasttime = thistime
 
 	
 if __name__ == "__main__":
