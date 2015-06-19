@@ -2,7 +2,12 @@ from gensim import corpora
 from six import PY3, iteritems, iterkeys, itervalues, string_types
 from patterns import Singleton
 
-@Singleton
+class SuperDictionary:
+	def __init__(self):
+		words = [ x.strip() for x in open("dictnostops.txt").readlines() ]
+		self.dictionary = corpora.Dictionary()
+		self.dictionary.add_documents([words])
+
 class WrapperDictionary:
 	def init(self, size):
 		self.super = corpora.Dictionary()
@@ -14,7 +19,7 @@ class WrapperDictionary:
 		self.num_nnz = self.super.num_nnz
 
 		self.index = 0
-		self.prefix = "uzumymw"
+		self.prefix = "abcdefgh"
 		self.size = size
 		self.numlist = self.createNumberList(size)
 		self.super.add_documents([self.numlist])

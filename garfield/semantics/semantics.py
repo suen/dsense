@@ -5,16 +5,11 @@ from gensim import corpora, models, similarities
 from pymongo import MongoClient
 from threading import Thread
 from datastream import FeedListener
+from dictionary import WrapperDictionary
 import web 
 from patterns import Singleton
 
-class SuperDictionary:
-	def __init__(self):
-		words = [ x.strip() for x in open("dictnostops.txt").readlines() ]
-		self.dictionary = corpora.Dictionary()
-		self.dictionary.add_documents([words])
 
-@Singleton
 class LDAModel:
 	def __init__(self):
 		pass
@@ -55,10 +50,10 @@ class LDAModel:
 		return self.lda.show_topics(num_topics=nb_topics)
 	
 class TwitterMiniBatch:
-	def __init__(self):
+	def __init__(self, buffersize):
 		self.buffer = []
 		self.queue = []
-		self.threshold = 10
+		self.buffersize = buffersize 
 	
 	def setDictionary(self, dictionary):
 		self.dictionary = dictionary
@@ -67,7 +62,7 @@ class TwitterMiniBatch:
 		if not tweetjson.has_key("text"):
 			return	
 		self.buffer.append(tweetjson)
-		if self.threshold == len(self.buffer):
+		if self.buffersize == len(self.buffer):
 			self.queue.append(self.buffer)
 			self.buffer = []
 	
@@ -122,4 +117,19 @@ class TwitterMiniBatch:
 			#print d['text'] + " = ", d['topic']
 			enrichedStream.append(d)
 		return enrichedStream
+
+@Singleton
+class ModelDict:
+
+	def init(self, modelname, nbWords):
+		wdict = WrapperDictionary()
+		wdict.init(nbWords)
+
+		self.model = LDAModel()
+		self.model.setName(modelname)
+		self.model.setDictionary(wdict)
+		self.model.initialize()
+
+		self.dict = wdict
+	
 
