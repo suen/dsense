@@ -2,10 +2,12 @@ import subprocess
 import time
 import requests
 import json
+import redis
+import sys
 
 class ModelManager:
 
-	def __init__(self):
+	def __init__(self, hostname, redishost, redisport=6379):
 		self.models = []
 		
 		self.startport = 8000
@@ -13,12 +15,16 @@ class ModelManager:
 		self.dictsize = 1000
 		self.mprefix = "model"
 		self.modelcount = 0
+		
+		self.hostname = hostname
+
+		self.r = redis.StrictRedis(host=redishost, port=redisport)
 
 	def getModelname(self):
 		return self.mprefix + str(self.modelcount+1)
 
 	def queryfull(self, modelport):
-		url = "http://localhost:" + str(modelport) + "/?qdict=isfull"
+		url = "http://" + self.hostname +":" + str(modelport) + "/?qdict=isfull"
 		try:
 			reply = requests.get(url)
 			replycontent = json.loads(reply.content)
@@ -33,10 +39,19 @@ class ModelManager:
 
 		self.nextport += 1
 		self.modelcount += 1
+	
+	def publishModelInfo(self):
+		modellist = []
+		for (modelport, modelname) in self.models:
+			modelurl = "http://" + self.hostname + ":" + str(modelport)
+			modellist.append({"model": modelname, "url": modelurl})
+
+		msgjson = {"models": modellist}
+		self.r.publish("model-info", json.dumps(msgjson))
 		
 	def run(self):
-		#run the first model
 		self.spawnModel()
+		self.publishModelInfo()
 
 		while True:
 			time.sleep(5)
@@ -47,12 +62,11 @@ class ModelManager:
 			if isfull:
 				print modelname + " is full, spawning new model"
 				self.spawnModel()
-			 
-
+				self.publishModelInfo()
 		
 
 if __name__ == "__main__":
-	mg =  ModelManager()
+	mg =  ModelManager("192.168.1.12", "127.0.0.1")
 	mg.run()
 	
 	
