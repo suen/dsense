@@ -56,10 +56,10 @@ class Feedback:
 		if word != "":
 			words = [ x.strip() for x in open("top1000.txt").readlines() ]
 			for w in words:
-				Main.Instance().wdict.add_word(w)
+				ModelDict.Instance().dict.add_word(w)
 			return "OK"
 
-			response = Main.Instance().wdict.add_word(word)
+			response = ModelDict.Instance().dict.add_word(word)
 			if response:
 				return "OK"
 			else:
