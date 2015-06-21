@@ -51,7 +51,6 @@ class ModelManager:
 		
 	def run(self):
 		self.spawnModel()
-		self.publishModelInfo()
 
 		while True:
 			time.sleep(5)
@@ -62,7 +61,8 @@ class ModelManager:
 			if isfull:
 				print modelname + " is full, spawning new model"
 				self.spawnModel()
-				self.publishModelInfo()
+
+			self.publishModelInfo()
 		
 
 if __name__ == "__main__":
