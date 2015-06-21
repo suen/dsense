@@ -30,6 +30,9 @@ class WrapperDictionary:
 		for i in range(upperbound):
 			strnum.append(self.prefix+str(i))
 		return strnum
+	
+	def isFull(self):
+		return (self.index >= self.size)
 
 	def add_word(self, word):
 		if self.index >= self.size:

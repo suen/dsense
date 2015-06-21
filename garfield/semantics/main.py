@@ -3,6 +3,7 @@ from datastream import FeedListener
 import http, time
 from threading import Thread
 from patterns import Singleton
+import sys
 
 @Singleton
 class Main:
@@ -13,7 +14,6 @@ class Main:
 
 		self.httpThread = Thread(target=self.starthttp)
 		self.httpThread.setDaemon(True)
-		self.httpThread.start()
 
 	def starthttp(self):
 		http.run()
@@ -31,15 +31,24 @@ class Main:
 		return
 	
 	def run(self):
+		
+		if len(sys.argv) != 4:
+			print "Usage: " + sys.argv[0] + " port modelname dictionarySize"
+			exit(1)
+
+		modelname = sys.argv[2]
+		dictionarysize = int(sys.argv[3])
+		self.httpThread.start()
 
 		modelDict = ModelDict.Instance()
-		modelDict.init("model1", 1000)
+		modelDict.init(modelname, dictionarysize)
 
 		self.model = modelDict.model
 		self.dict = modelDict.dict
 
 		#print self.model.show_topics(20)
-		print self.model
+		if self.model is not None:
+			print "Topic model initialized"
 		#print self.model.lda
 
 		tmb = TwitterMiniBatch(100)

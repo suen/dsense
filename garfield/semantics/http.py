@@ -9,11 +9,11 @@ urls = (
 
 class REST:        
 	def GET(self):
-		param = web.input(query="", getTopics="", getDictionary="")
+		param = web.input(query="", getTopics="", qdict="")
 		
 		query = param.query
 		topics = param.getTopics
-		dictionary = param.getDictionary
+		dictionary = param.qdict
 		if query != "":
 			model = ModelDict.Instance().model
 			topics = model.textquery(query)
@@ -30,9 +30,15 @@ class REST:
 
 			return json.dumps(result) 
 
-		if dictionary != "":
+		if dictionary != "" and dictionary.lower() == "gettokens":
 			map = ModelDict.Instance().dict.token2id
 			result = {"result": map}
+
+			return json.dumps(result) 
+
+		if dictionary != "" and dictionary.lower() == "isfull":
+			isfull = ModelDict.Instance().dict.isFull()
+			result = {"result": str(isfull)}
 
 			return json.dumps(result) 
 
