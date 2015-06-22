@@ -2,16 +2,20 @@ import redis
 import json
 import time
 from http_crawler import TwitterAPIClient
+from threading import Thread
 
-redisclient = redis.StrictRedis()
-tc = TwitterAPIClient()	
 
-count = 0
-time1 = time.time()
-while True:
-	resp = tc.fetchPublicStreamSample()
-	for r in resp:
-		msg = json.loads(r)
+
+def processthread():
+	while True:
+		if len(buffer) == 0:
+			time.sleep(1)
+			continue
+
+		msg = buffer[0]
+		buffer = buffer[1:]
+
+		msg = json.loads(msg)
 		if not msg.has_key('lang') or msg['lang'] != "en":
 			continue
 
@@ -19,14 +23,22 @@ while True:
 		if len(text.split()) <= 4:
 			continue
 		
-		try:
-			pass
-		except:
-			print "JSon exception"
-		
 		plaintweet = {"text": text, "id": msg['id'] }
 
 		redisclient.publish("twitter-realtime", json.dumps(plaintweet))
+	
+
+redisclient = redis.StrictRedis()
+tc = TwitterAPIClient()	
+
+count = 0
+buffer = []
+time1 = time.time()
+while True:
+	resp = tc.fetchPublicStreamSample()
+	for r in resp:
+		
+		self.buffer.append(r)
 
 		count += 1
 		if count % 500 == 0:
