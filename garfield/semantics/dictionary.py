@@ -37,6 +37,9 @@ class WrapperDictionary:
 	def add_word(self, word):
 		if self.index >= self.size:
 			return False
+		
+		if self.super.token2id.has_key(word):
+			return True
 
 		token2id = self.super.token2id
 
