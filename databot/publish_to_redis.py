@@ -38,7 +38,7 @@ while True:
 	resp = tc.fetchPublicStreamSample()
 	for r in resp:
 		
-		self.buffer.append(r)
+		buffer.append(r)
 
 		count += 1
 		if count % 500 == 0:
