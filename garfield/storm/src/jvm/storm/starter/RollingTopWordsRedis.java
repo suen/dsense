@@ -59,13 +59,16 @@ public class RollingTopWordsRedis {
   private final String topologyName;
   private final Config topologyConfig;
   private final int runtimeInSeconds;
+  
+  private String redisHost = "localhost";
 
-  public RollingTopWordsRedis(String topologyName) throws InterruptedException {
+  public RollingTopWordsRedis(String topologyName, String redisHost) throws InterruptedException {
     builder = new TopologyBuilder();
     this.topologyName = topologyName;
     topologyConfig = createTopologyConfiguration();
     runtimeInSeconds = DEFAULT_RUNTIME_IN_SECONDS;
 
+    this.redisHost = redisHost;
     wireTopology();
   }
 
@@ -150,13 +153,13 @@ public class RollingTopWordsRedis {
     String counterId = "counter";
     String intermediateRankerId = "intermediateRanker";
     String totalRankerId = "finalRanker";
-    builder.setSpout("spout", new RedisPubSubSpout("localhost",6379,"twitter-stream"), 1);
+    builder.setSpout("spout", new RedisPubSubSpout(redisHost,6379,"twitter-stream"), 1);
     builder.setBolt("splitter", new WordSplitterBolt(),3).shuffleGrouping("spout");
 	builder.setBolt(counterId, new RollingCountBolt(9, 3), 4).fieldsGrouping("splitter", new Fields("word"));
     builder.setBolt(intermediateRankerId, new IntermediateRankingsBolt(TOP_N), 4).fieldsGrouping(counterId, new Fields(
         "obj"));
     builder.setBolt(totalRankerId, new TotalRankingsBolt(TOP_N)).globalGrouping(intermediateRankerId);
-  	builder.setBolt("publish", new PublishRedisBolt("localhost",6379,"topwords")).globalGrouping(totalRankerId);
+  	builder.setBolt("publish", new PublishRedisBolt(redisHost,6379,"topwords")).globalGrouping(totalRankerId);
   }
 
   public void runLocally() throws InterruptedException {
@@ -208,9 +211,14 @@ public class RollingTopWordsRedis {
     if (args.length >= 2 && args[1].equalsIgnoreCase("remote")) {
       runLocally = false;
     }
+    
+    String redisHost = "localhost";
+    if (args.length >= 2 && !args[1].equalsIgnoreCase("remote")) {
+        redisHost = args[1];
+     }
 
     LOG.info("Topology name: " + topologyName);
-    RollingTopWordsRedis rtw = new RollingTopWordsRedis(topologyName);
+    RollingTopWordsRedis rtw = new RollingTopWordsRedis(topologyName, redisHost);
     //if run locally it will stop after a certain amount of time
 	if (runLocally) {
       LOG.info("Running in local mode");
