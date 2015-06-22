@@ -66,7 +66,9 @@ class ModelManager:
 		
 
 if __name__ == "__main__":
-	mg =  ModelManager("192.168.1.12", "127.0.0.1")
+	if len(sys.argv) != 3:
+		print "Usage: " + sys.argv[0] + "host redis-host"
+		exit(1)
+
+	mg =  ModelManager(sys.argv[1], sys.argv[2])
 	mg.run()
-	
-	
