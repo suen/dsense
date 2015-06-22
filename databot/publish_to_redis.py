@@ -6,7 +6,7 @@ from threading import Thread
 
 
 
-def processthread():
+def process():
 	while True:
 		if len(buffer) == 0:
 			time.sleep(1)
@@ -28,12 +28,16 @@ def processthread():
 		redisclient.publish("twitter-realtime", json.dumps(plaintweet))
 	
 
+pthread = Thread(target=process)
+pthread.setDaemon(True)
+
 redisclient = redis.StrictRedis()
 tc = TwitterAPIClient()	
 
 count = 0
 buffer = []
 time1 = time.time()
+pthread.start()
 while True:
 	resp = tc.fetchPublicStreamSample()
 	for r in resp:
