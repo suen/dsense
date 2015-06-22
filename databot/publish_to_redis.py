@@ -15,12 +15,18 @@ while True:
 		if not msg.has_key('lang') or msg['lang'] != "en":
 			continue
 
+		text = msg['text']
+		if len(text.split()) <= 4:
+			continue
+		
 		try:
 			pass
 		except:
 			print "JSon exception"
+		
+		plaintweet = {"text": text, "id": msg['id'] }
 
-		redisclient.publish("twitter-realtime", r)
+		redisclient.publish("twitter-realtime", json.dumps(plaintweet))
 
 		count += 1
 		if count % 500 == 0:
