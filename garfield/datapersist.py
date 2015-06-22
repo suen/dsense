@@ -1,15 +1,17 @@
 import redis
 from threading import Thread
 from pymongo import MongoClient
-import json, time
+import json, time, sys
 
 class FeedPersistence:
 	
-	def __init__(self):
+	def __init__(self, redishost, redisport=6379):
 		self.mg = MongoClient().twitter.warehouse
-		self.r = redis.StrictRedis()
+		self.r = redis.StrictRedis(host=redishost, port=redisport)
 		self.p = self.r.pubsub()
 		self.p.subscribe("twitter-postmodel")
+
+		print self.p.get_message()
 		self.handler = None
 
 		self.listenThread = Thread(target=self.listen)
@@ -58,6 +60,10 @@ class FeedPersistence:
 				self.packet = []
 
 if __name__ == "__main__":
-	dt = FeedPersistence()
+	if len(sys.argv) != 2:
+		print "Usage: " + sys.argv[0] + " <Redis host>"
+		exit(1)
+
+	dt = FeedPersistence(sys.argv[1])
 	dt.start()
 	dt.listenThread.join()
