@@ -3,46 +3,89 @@
 import redis
 import json
 import time
+from threading import Thread
 
-redisin = redis.StrictRedis(host="daubajee.com", port=80)
-redisout = redis.StrictRedis()
+class StreamForwardBot:
+	def __init__(self):
+		self.redisin = redis.StrictRedis(host="daubajee.com", port=80)
+		self.redisout = redis.StrictRedis()
 
-pubsub = redisin.pubsub()
-pubsub.subscribe("twitter-realtime")
+		self.pubsub = self.redisin.pubsub()
+		self.pubsub.subscribe("twitter-realtime")
 
-pubsub.get_message()
-
-count = 0
-time1 = time.time()
-while True:
-	incoming = pubsub.get_message()
-
-
-	if incoming is None:
-		time.sleep(0.01)
-		continue
+		self.pubsub.get_message()
 	
-	if not isinstance(incoming['data'], str):
-		print "Data not Text Exception"
-		time.sleep(0.01)
-		continue
+		self.buffer1 = []
+		self.buffer2 = []
+
+		thread1 = Thread(target=self.threadrun)
+		thread1.setDaemon(True)
+		thread1.start()
 	
-	try:
-		msg = json.loads(incoming['data'])
-		redisout.publish("twitter-stream", json.dumps(msg))
-	
-	except:
-		print "Json Casting Exception"
 
-	count += 1
+	def threadrun(self):
+		count = 0
+		while True:
+			if len(self.buffer1) == 0 or len(self.buffer2) == 0:
+				time.sleep(0.01)
+				continue
 
-	if count % 200 == 0:
-		time2 = time.time()
-		delta = time2 - time1
-		rate = 200 / delta
+			if count % 2 == 0:
+				msg = self.buffer1[0]
+				self.buffer1 = self.buffer1[1:]
+			else:
+				msg = self.buffer2[0]
+				self.buffer2 = self.buffer2[1:]
+			
+			self.publish(msg)
+			
+			count += 1
+			if count % 200 == 0:
+				print "%d published to redis"%count
+				
 
-		print "%d forwarded, Rate: %f "%(count,rate)
 
-		time1 = time2
+	def publish(self,msg):
+		try:
+			msg = json.loads(msg['data'])
+			self.redisout.publish("twitter-stream", json.dumps(msg))
+		
+		except:
+			print "Json Casting Exception"
+		
+	def run(self):
+		count = 0
+		time1 = time.time()
+		while True:
+			incoming = self.pubsub.get_message()
 
 
+			if incoming is None:
+				time.sleep(0.01)
+				continue
+			
+			if not isinstance(incoming['data'], str):
+				print "Data not Text Exception"
+				continue
+			
+			#self.publish(incoming)
+
+			if count % 2 == 0:
+				self.buffer1.append(incoming)
+			else:
+				self.buffer2.append(incoming)
+
+			count += 1
+
+			if count % 200 == 0:
+				time2 = time.time()
+				delta = time2 - time1
+				rate = 200 / delta
+
+				print "%d retrieved, Rate: %f "%(count,rate)
+
+				time1 = time2
+
+if __name__ == "__main__":
+	stb = StreamForwardBot()
+	stb.run()
