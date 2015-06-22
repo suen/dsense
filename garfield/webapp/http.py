@@ -4,6 +4,7 @@ from model import ModelAccess
 from pymongo import MongoClient
 from realtime import StreamFixedQueue
 import pymongo
+import sys
 
 urls = (
     '/', 'Static',
@@ -76,12 +77,15 @@ class REST:
 	def POST(self):
 		self.GET()
 
-def run():
+def run(redishost):
 	StreamFixedQueue.Instance().start()
-	ModelAccess.Instance().init("127.0.0.1")
+	ModelAccess.Instance().init(redishost)
 	app = web.application(urls, globals())
 	app.internalerror = web.debugerror
 	app.run()
 
 if __name__ == "__main__":
-	run()
+	if len(sys.argv) != 3:
+		print "Usage: " + sys.argv[0] + " <HTTP PORT> <REDIS HOST>"
+		exit(1)
+	run(sys.argv[2])
