@@ -69,7 +69,7 @@ class ModelManager:
 
 if __name__ == "__main__":
 	if len(sys.argv) != 3:
-		print "Usage: " + sys.argv[0] + "host redis-host"
+		print "Usage: " + sys.argv[0] + " <host> <redis-host>"
 		exit(1)
 
 	mg =  ModelManager(sys.argv[1], sys.argv[2])
