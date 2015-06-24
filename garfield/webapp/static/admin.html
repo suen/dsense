@@ -1,0 +1,67 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Dsense - garfield - Topic visualisation</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="stylesheet" href="static/bower_components/bootstrap/dist/css/bootstrap.min.css">
+        <link rel="stylesheet" href="static/bower_components/bootstrap-fileinput/css/fileinput.min.css">
+		<style>
+			.list-inline {
+				list-style: none;
+				display: inline;
+				padding: 0px;
+				margin: 0px;
+			}
+			.list-inline li {
+				margin-right: 10px;
+				margin-bottom: 5px;
+			}
+		</style>
+
+		<script src="static/bower_components/jquery/dist/jquery.min.js"></script>
+		<script src="static/bower_components/angular/angular.min.js"></script>
+		<script src="static/bower_components/bootstrap-fileinput/js/fileinput.min.js" type="text/javascript"></script>
+		<script src="static/bower_components/bootstrap/dist/js/bootstrap.min.js" type="text/javascript"></script>
+		<!--<script src="bower_components/angular-resource/angular-resource.min.js"></script>-->
+
+		<script src="static/js/admin.js"></script>
+		<!--
+		<script src="js/service.js"></script>
+		-->
+    </head>
+    <body style="background: #efefef;">
+		<div class="container" ng-app="dsense" ng-controller="mainController">
+			<nav class="navbar">
+			<div class="container-fluid">
+				<div class="nav-header">
+					<h1>dSense</h1>
+				</div>
+			</div>
+			</nav>
+			
+			<div class="container">
+				<div class="row">
+					<h2>Topic Models</h2>
+					<div style="background: #ffffff; margin: 0px 10px 10px 10px" class="col-xs-5" ng-repeat="topic in topiclist">
+						<h4>Model Name: {{ topic['name'] }}</h4>		
+						<p>Word count: {{ topic['count'] }}</p>
+							<ul class="list-inline"> 
+								<li ng-repeat="(k,v) in topic['words'] "> {{ k }} </li>
+							</ul>
+						</div>
+				</div>
+				<div class="row">
+					<div class="col-xs-7">
+						
+					</div>
+				</div>
+
+			</div>
+
+		</div>
+    </body>
+</html>
