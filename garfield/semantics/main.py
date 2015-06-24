@@ -32,12 +32,13 @@ class Main:
 	
 	def run(self):
 		
-		if len(sys.argv) != 4:
-			print "Usage: " + sys.argv[0] + " port modelname dictionarySize"
+		if len(sys.argv) != 5:
+			print "Usage: " + sys.argv[0] + " <port> <modelname> <dictionarySize> <redis-host>"
 			exit(1)
 
 		modelname = sys.argv[2]
 		dictionarysize = int(sys.argv[3])
+		redishost = sys.argv[4]
 		self.httpThread.start()
 
 		modelDict = ModelDict.Instance()
@@ -54,7 +55,7 @@ class Main:
 		tmb = TwitterMiniBatch(100)
 		tmb.setDictionary(self.dict)
 
-		streamfeed = FeedListener()
+		streamfeed = FeedListener(redishost)
 		streamfeed.setStreamHandler(tmb)
 		streamfeed.setFeedbackHandler(self)
 		streamfeed.startListen()

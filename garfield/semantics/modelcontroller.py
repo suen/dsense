@@ -18,6 +18,8 @@ class ModelManager:
 		
 		self.hostname = hostname
 
+		self.redishost = redishost
+
 		self.r = redis.StrictRedis(host=redishost, port=redisport)
 
 	def getModelname(self):
@@ -34,7 +36,7 @@ class ModelManager:
 			return False
 	
 	def spawnModel(self):
-		subprocess.Popen(["python", "main.py", str(self.nextport), self.getModelname(), str(self.dictsize)])
+		subprocess.Popen(["python", "main.py", str(self.nextport), self.getModelname(), str(self.dictsize), self.redishost])
 		self.models.append( (self.nextport, self.getModelname()))
 
 		self.nextport += 1

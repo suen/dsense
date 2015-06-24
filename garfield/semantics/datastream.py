@@ -5,8 +5,8 @@ import json
 
 class FeedListener:
 
-	def __init__(self):
-		self.r = redis.StrictRedis()
+	def __init__(self, redishost):
+		self.r = redis.StrictRedis(host=redishost)
 		self.streamchannel = self.r.pubsub()
 		self.streamchannel.subscribe("twitter-stream")
 
@@ -93,7 +93,7 @@ class HandlerTest:
 	
 if __name__ == "__main__":
 	h = HandlerTest()
-	d = FeedListener()
+	d = FeedListener("localhost")
 	d.setStreamHandler(h)
 	d.setFeedbackHandler(h)
 	d.startListen()
