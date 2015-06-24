@@ -6,8 +6,8 @@ from patterns import Singleton
 import random
 
 class FeedListener:
-	def __init__(self):
-		self.r = redis.StrictRedis()
+	def __init__(self, redishost):
+		self.r = redis.StrictRedis(host=redishost)
 		self.p = self.r.pubsub()
 		self.p.subscribe("twitter-stream")
 
@@ -70,14 +70,15 @@ class FeedListener:
 
 @Singleton
 class StreamFixedQueue:
-	def __init__(self):
-		self.listener = FeedListener()
+	def init(self, redishost):
+		self.listener = FeedListener(redishost)
 		self.listener.setDataHandler(self)
 		self.buffer = []
 		self.size = 10
 
 		self.topwords = []
 		self.tsize = 20
+		return self
 
 	def start(self):
 		self.listener.startListen()

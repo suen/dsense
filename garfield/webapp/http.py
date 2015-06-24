@@ -78,7 +78,7 @@ class REST:
 		self.GET()
 
 def run(redishost):
-	StreamFixedQueue.Instance().start()
+	StreamFixedQueue.Instance().init(redishost).start()
 	ModelAccess.Instance().init(redishost)
 	app = web.application(urls, globals())
 	app.internalerror = web.debugerror
