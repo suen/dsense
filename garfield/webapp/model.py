@@ -4,6 +4,7 @@ import time
 import redis
 from threading import Thread
 from patterns import Singleton
+import pymongo 
 
 class HClient:
 	def __init__(self, serveraddress):
@@ -17,7 +18,8 @@ class HClient:
 
 @Singleton
 class ModelAccess:
-	def init(self, redishost, redisport=6379):
+	def init(self, redishost, mongodbhost, redisport=6379):
+		self.mongodbhost = mongodbhost
 		self.r = redis.StrictRedis(host=redishost, port=redisport)
 		self.p = self.r.pubsub()
 		self.p.subscribe("model-info")
@@ -28,10 +30,11 @@ class ModelAccess:
 		self.thread.start()
 
 		self.models = []
+		self.mgwarehouse = pymongo.MongoClient(host=mongodbhost).twitter.warehouse
 
 	def update(self, msgjson):
 		self.models = msgjson['models'] 
-		print "Models updated"
+		print "Model list updated"
 
 	def queryModel(self, address, keywords):
 		url = address + "/?query=" + keywords
@@ -49,7 +52,19 @@ class ModelAccess:
 
 			resultModels += modelreply['result']
 
-		return resultModels
+		print resultModels
+		
+		tweets = set() 
+		for result in resultModels:
+			model = result['model']
+			cursor = self.mgwarehouse.find({"topic": {"$elemMatch": { "model": model, "score": {"$gte" : 0.10 }} }}, {"topic.$":1, "text": 1}).sort("topic.score", pymongo.DESCENDING).limit(30)
+			#cursor = mgclient.find({"topic.model": model}, {"text":1, "topic": 1})
+			for d in cursor:
+				doc = d['text']
+				#score = d['topic'][model]
+				tweets.add(doc)
+
+		return tweets 
 
 
 	

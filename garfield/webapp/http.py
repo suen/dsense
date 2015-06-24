@@ -35,7 +35,7 @@ class Realtime:
 class REST:        
 	def GET(self):
 		#httpclient = HClient("http://localhost:8080")
-		mgclient = MongoClient().twitter.warehouse
+		#mgclient = MongoClient().twitter.warehouse
 		param = web.input(query="")
 		
 		query = param.query
@@ -45,11 +45,13 @@ class REST:
 		print "Query = " + query
 
 		#resultquery = httpclient.query(query)
-		resultquery = ModelAccess.Instance().query(query) 
+		#resultquery = ModelAccess.Instance().query(query) 
+		tweets = ModelAccess.Instance().query(query) 
 
 		#this is a list
-		print "Result Models: ",resultquery 
+		#print "Result Models: ",resultquery 
 
+		'''
 		tweets = set() 
 		for result in resultquery:
 			model = result['model']
@@ -61,10 +63,7 @@ class REST:
 				tweets.add(doc)
 
 		print tweets
-
-		results = {"results": ["This is tweet1", "Tweet 2 is here",
-							"Tweet 3 is here", "There is sth here" ] }
-
+		'''
 		results = {"results": list(tweets)}
 
 		return json.dumps(results) 
@@ -77,15 +76,15 @@ class REST:
 	def POST(self):
 		self.GET()
 
-def run(redishost):
+def run(redishost, mongodbhost):
 	StreamFixedQueue.Instance().init(redishost).start()
-	ModelAccess.Instance().init(redishost)
+	ModelAccess.Instance().init(redishost, mongodbhost)
 	app = web.application(urls, globals())
 	app.internalerror = web.debugerror
 	app.run()
 
 if __name__ == "__main__":
-	if len(sys.argv) != 3:
-		print "Usage: " + sys.argv[0] + " <HTTP PORT> <REDIS HOST>"
+	if len(sys.argv) != 4:
+		print "Usage: " + sys.argv[0] + " <HTTP PORT> <REDIS HOST> <MONGODB HOST>"
 		exit(1)
-	run(sys.argv[2])
+	run(sys.argv[2], sys.argv[3])
