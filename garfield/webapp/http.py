@@ -8,6 +8,7 @@ import sys
 
 urls = (
     '/', 'Static',
+	'/admin', 'AdminStatic',
     '/rest', 'REST',
     '/realtime', 'Realtime',
 )
@@ -20,6 +21,10 @@ class Static:
 	
 	def POST(self):
 		pass
+
+class AdminStatic:
+	def GET(self):
+		return render.admin()
 
 class Realtime:
 
@@ -36,22 +41,29 @@ class REST:
 	def GET(self):
 		#httpclient = HClient("http://localhost:8080")
 		#mgclient = MongoClient().twitter.warehouse
-		param = web.input(query="")
+		param = web.input(query="", modelinfo="")
 		
 		query = param.query
-		if query == "":
+		modelinfo = param.modelinfo
+		if query == "" and modelinfo == "":
 			return "" 
+
+		if modelinfo != "":
+			modellist = ModelAccess.Instance().modelinfo()
+			result = {"results": modellist}
+			print result
+			return json.dumps(result) 
+
 			
 		print "Query = " + query
 
+		'''
 		#resultquery = httpclient.query(query)
 		#resultquery = ModelAccess.Instance().query(query) 
-		tweets = ModelAccess.Instance().query(query) 
 
 		#this is a list
 		#print "Result Models: ",resultquery 
 
-		'''
 		tweets = set() 
 		for result in resultquery:
 			model = result['model']
@@ -64,6 +76,7 @@ class REST:
 
 		print tweets
 		'''
+		tweets = ModelAccess.Instance().query(query) 
 		results = {"results": list(tweets)}
 
 		return json.dumps(results) 

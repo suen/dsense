@@ -36,7 +36,37 @@ class ModelAccess:
 		self.models = msgjson['models'] 
 		print "Model list updated"
 
-	def queryModel(self, address, keywords):
+	def queryModelInfo(self, address):
+		url = address + "/?qdict=gettokens"
+		reply = requests.get(url)
+		replycontent = json.loads(reply.content)
+		return replycontent
+
+	def modelinfoFormat(self, modelinfo):
+		index = modelinfo['nextindex']
+		tokensID = modelinfo['tokensID']
+		
+		for i in range(index, 1000):
+			if tokensID.has_key("abcdefgh" + str(i)):
+				del tokensID["abcdefgh" + str(i)]
+		return {"words": tokensID, "count": index}
+
+
+	def modelinfo(self):
+		modelinfolist = []
+		for modeldict in self.models:
+			modeladdress = modeldict['url']
+			modelinfo = self.queryModelInfo(modeladdress)
+
+			modelinfo = self.modelinfoFormat(modelinfo)
+
+			modelinfo['name'] = modeldict['model']
+			modelinfolist.append(modelinfo)
+
+		return modelinfolist
+
+
+	def querymodel(self, address, keywords):
 		url = address + "/?query=" + keywords
 		reply = requests.get(url)
 		replycontent = json.loads(reply.content)
@@ -48,7 +78,7 @@ class ModelAccess:
 		for modeldict in self.models:
 			modeladdress = modeldict['url']
 
-			modelreply = self.queryModel(modeladdress, keywords)
+			modelreply = self.querymodel(modeladdress, keywords)
 
 			resultModels += modelreply['result']
 
