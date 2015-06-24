@@ -90,12 +90,23 @@ class TwitterAPIClient:
 		t.setDaemon(True)
 		t.start()
 
+		count = 0
+		time1 = time.time()
 		for r in urlresponse:
 			self.buffer.append(r)
+			count += 1
+			if count % 100 == 0:
+				time2 = time.time()
+				delta = time2 - time1
+				rate = 100 / delta
+				print "Incoming count: %d, Rate: %f"%(count,rate)
+				time1 = time2
 
 	
 	def saveFilterStreamThread(self, dbcollection, minNbWords, lang):
 		processed = 0
+		reject = 0
+		time1 = time.time()
 		while True:
 			if len(self.buffer) == 0:
 				time.sleep(0.00001)
@@ -107,13 +118,22 @@ class TwitterAPIClient:
 				
 				if (r['lang'] == lang and len(r['text'].strip(" ")) >= minNbWords):
 					#print r['text'] 
-					dbcollection.insert(r)
+					rs = {"text": r['text'], "id": r['id'], "created_at": r['created_at'], "user": r['user']['screen_name']}
+					dbcollection.insert(rs)
 					processed += 1
 
-					if processed % 100 == 0:
-						print "Processed : " + str(processed)
+				else:
+					reject += 1
 			except:
+				reject += 1
 				pass
+
+			if (processed+reject) % 100 == 0:
+				time2 = time.time()
+				delta = time2 - time1
+				rate = 100 / delta
+				print "Processed : %d + Reject: %d = %d, Rate: %f"%(processed,reject,processed+reject,rate)
+				time1 = time2
 	
 	def fetchTrends(self, woeid=1):
 		url = "https://api.twitter.com/1.1/trends/place.json?id="+str(woeid)
@@ -157,11 +177,10 @@ class TwitterAPIClient:
 				userdb.insert(l)
 				#f.write(l)
 				count += 1;
-				print l
+				#print l
+			print "%s %d fetched"%(acc,count)
 
 if __name__ == "__main__":
 	tc = TwitterAPIClient()	
 	resp = tc.fetchPublicStreamSample()
-	for r in resp:
-		print r
-	tc.saveFilterStream(resp, "sample", 6)
+	tc.saveFilterStream(resp, "save", 5)
