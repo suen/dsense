@@ -12,7 +12,7 @@ class ModelManager:
 		
 		self.startport = 8000
 		self.nextport = 8000
-		self.dictsize = 1000
+		self.dictsize = 100
 		self.mprefix = "model"
 		self.modelcount = 0
 		

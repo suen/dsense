@@ -32,7 +32,14 @@ class REST:
 
 		if dictionary != "" and dictionary.lower() == "gettokens":
 			map = ModelDict.Instance().dict.token2id
-			result = {"result": map}
+			index = ModelDict.Instance().dict.index
+			result = {"tokensID": map, "nextindex": index}
+
+			print "/?qdict=gettokens"
+
+			return json.dumps(result) 
+
+		if dictionary != "" and dictionary.lower() == "dictsize":
 
 			return json.dumps(result) 
 
