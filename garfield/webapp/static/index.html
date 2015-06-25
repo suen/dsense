@@ -20,6 +20,17 @@
 				margin-right: 10px;
 				margin-bottom: 5px;
 			}
+
+			p.lead {
+				padding: 5px 0px 0px 20px;
+			}
+
+			.tweetlist {
+				border-bottom: 1px solid #9f9f9f;
+			}
+
+		
+
 		</style>
 
 		<script src="static/bower_components/jquery/dist/jquery.min.js"></script>
@@ -35,23 +46,29 @@
     </head>
     <body style="background: #efefef;">
 		<div class="container" ng-app="dsense" ng-controller="mainController">
-			<nav class="navbar">
 			<div class="container-fluid">
-				<div class="nav-header">
-					<h1>dSense</h1>
-					<div style="clear:both;margin: 0px auto;">
-						<form class="form-inline">
-							<input type="text" class="form-control input-lg" style="width: 500px" ng-model="query" placeholder="Type in a query">
-							<button class="btn btn-primary btn-lg" ng-click="submitQuery()" >Query</button>
-						</form>
+				<div class="row">
+					
+					<div class="col-xs-7">
+						<h1>dSense</h1>
+						<div style="clear:both;margin: 0px auto;">
+							<form class="form-inline">
+								<input type="text" class="form-control input-lg" style="width: 500px" ng-model="query" placeholder="Type in a query">
+								<button class="btn btn-primary btn-lg" ng-click="submitQuery()" >Query</button>
+							</form>
+						</div>
+					</div>
+					<div class="cols-xs-5" style="float: right; width: 400px; background:#dfdfdf; border: 1px solid #1f1f1f; margin: 20px 0px 20px 20px;">
+						<h3 style="padding: 10px 10px 10px 10px; background: #2F4F4F; color: #ffffff;margin: 0px;">Statistics</h3>
+						<p class="lead">Tweets count : {{ tweetcount }} <p>
+						<p class="lead">Rate : {{ tweetrate }} <p>
 					</div>
 				</div>
 			</div>
-			</nav>
 			
 			<div></div>
 
-			<div class="container">
+			<div class="container-fluid">
 				<div class="row">
 					<div class="col-xs-7">
 						<ul class="list-inline">
@@ -80,7 +97,7 @@
 						<h3 style="padding: 10px 10px 10px 10px; background: #2F4F4F; color: #ffffff;margin: 0px;">Stream Sample Realtime</h3>
 						<table class="table" style="width:400px;">
 							<tr ng-repeat=" r in stream ">
-								<td>{{ r['text'] }}</td>
+								<td class="tweetlist">{{ r['text'] }}</td>
 							</tr>
 						</table>
 					</div>

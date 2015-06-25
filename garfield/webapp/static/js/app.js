@@ -12,6 +12,9 @@ app.controller('mainController', ['$scope', '$http', function($scope, $http){
 	$scope.executedquery = "";
 	$scope.error = "";
 
+	$scope.tweetcount = 0;
+	$scope.tweetrate = "NaN"; 
+
     $scope.submitQuery = function(){
 		
 		$scope.firstrun = false;
@@ -53,6 +56,9 @@ app.controller('mainController', ['$scope', '$http', function($scope, $http){
 				$scope.stream = data['results']
 			}
 			$scope.topwords = data['topwords'];
+
+			$scope.tweetcount = data['counter'];
+			$scope.tweetrate = data['rate'].toString() + " tweets/second";
 			//console.log(data)
 		}).error(function(){
 			console.err("Realtime stream failed");
