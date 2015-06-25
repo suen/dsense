@@ -12,12 +12,15 @@ app.controller('mainController', ['$scope', '$http', function($scope, $http){
 				$scope.topiclist = data['results']
 			}
 
+			console.log("Refreshed");
+
 		}).error(function(){
 			console.err("Refresh failed");
 		});
 	};
 
-	//setInterval($scope.queryrealtime, 2000);
+
+	setInterval($scope.refresh, 5000);
 
 	$scope.refresh()
 
