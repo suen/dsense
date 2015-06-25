@@ -75,6 +75,14 @@
 							<li ng-repeat="t in topwords">{{ t['word'] + "(" + t['count'] + ")" }}</li>
 						</ul>
 					</div>
+					<div class="cols-xs-5" style="float: right; width: 400px; background:#dfdfdf; border: 1px solid #1f1f1f;">
+						<h3 style="padding: 10px 10px 10px 10px; background: #2F4F4F; color: #ffffff;margin: 0px;">Stream Sample Realtime</h3>
+						<table class="table" style="width:400px;">
+							<tr ng-repeat=" r in stream ">
+								<td class="tweetlist">{{ r['text'] }}</td>
+							</tr>
+						</table>
+					</div>
 				</div>
 				<div class="row">
 					<div class="col-xs-7">
@@ -92,14 +100,6 @@
 							</tr>
 						</table>
 						-->
-					</div>
-					<div class="cols-xs-5" style="float: right; width: 400px; background:#dfdfdf; border: 1px solid #1f1f1f;">
-						<h3 style="padding: 10px 10px 10px 10px; background: #2F4F4F; color: #ffffff;margin: 0px;">Stream Sample Realtime</h3>
-						<table class="table" style="width:400px;">
-							<tr ng-repeat=" r in stream ">
-								<td class="tweetlist">{{ r['text'] }}</td>
-							</tr>
-						</table>
 					</div>
 				</div>
 
