@@ -81,6 +81,7 @@ class StreamFixedQueue:
 		self.counter = 0
 		self.lastcounter = 0
 		self.time1 = time.time()
+		self.starttime = time.time()
 		return self
 
 	def start(self):
@@ -97,7 +98,8 @@ class StreamFixedQueue:
 		rate = (self.counter - self.lastcounter) / (time2 - self.time1)
 		self.lastcounter = self.counter 
 		self.time1 = time2
-		return self.counter, round(rate,2)
+		uptime = self.time1 - self.starttime
+		return self.counter, round(rate,2), uptime
 
 	
 	def feedTopWords(self, word):

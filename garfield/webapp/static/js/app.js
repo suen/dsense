@@ -11,6 +11,7 @@ app.controller('mainController', ['$scope', '$http', function($scope, $http){
 	$scope.noresult = false;
 	$scope.executedquery = "";
 	$scope.error = "";
+	$scope.uptime = "0s";
 
 	$scope.tweetcount = 0;
 	$scope.tweetrate = "NaN"; 
@@ -59,6 +60,17 @@ app.controller('mainController', ['$scope', '$http', function($scope, $http){
 
 			$scope.tweetcount = data['counter'];
 			$scope.tweetrate = data['rate'].toString() + " tweets/second";
+		
+			hour = data['uptime'] / (3600);
+			hour = Math.floor(hour,0);
+			min = data['uptime'] - (hour * 60);
+			min = Math.floor(min/60,0);
+			sec = data['uptime'] - (hour * 60) - (min*60);
+
+			sec = Math.floor(sec,0);
+			
+			$scope.uptime = hour.toString() + "h" + min.toString() + "m" + sec.toString() + "s";
+
 			//console.log(data)
 		}).error(function(){
 			console.err("Realtime stream failed");

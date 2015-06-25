@@ -31,9 +31,9 @@ class Realtime:
 	def GET(self):
 		stream = StreamFixedQueue.Instance()
 
-		counter,rate = stream.getTweetRate()
+		counter,rate,uptime = stream.getTweetRate()
 		
-		results = {"results": stream.getSample(), "topwords": stream.getTopwords(), "counter": counter, "rate":rate }
+		results = {"results": stream.getSample(), "topwords": stream.getTopwords(), "counter": counter, "rate":rate, "uptime": uptime }
 		return json.dumps(results)
 	
 	def POST(self):
