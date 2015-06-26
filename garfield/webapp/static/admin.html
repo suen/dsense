@@ -44,8 +44,8 @@
 			</nav>
 			
 			<div class="container">
+				<h2>Topic Models</h2> <button class="btn btn-lg btn-primary" ng-click="refresh()"> Refresh</button>
 				<div class="row">
-					<h2>Topic Models</h2>
 					<div style="background: #ffffff; margin: 0px 10px 10px 10px" class="col-xs-5" ng-repeat="topic in topiclist">
 						<h4>Model Name: {{ topic['name'] }}</h4>		
 						<p>Word count: {{ topic['count'] }}</p>

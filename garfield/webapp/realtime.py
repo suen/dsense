@@ -78,6 +78,10 @@ class StreamFixedQueue:
 
 		self.topwords = []
 		self.tsize = 20
+		self.counter = 0
+		self.lastcounter = 0
+		self.time1 = time.time()
+		self.starttime = time.time()
 		return self
 
 	def start(self):
@@ -87,6 +91,16 @@ class StreamFixedQueue:
 		self.buffer.append(msg)
 		if len(self.buffer) > self.size: 
 			self.buffer = self.buffer[1:]
+		self.counter += 1
+	
+	def getTweetRate(self):
+		time2 = time.time()
+		rate = (self.counter - self.lastcounter) / (time2 - self.time1)
+		self.lastcounter = self.counter 
+		self.time1 = time2
+		uptime = self.time1 - self.starttime
+		return self.counter, round(rate,2), uptime
+
 	
 	def feedTopWords(self, word):
 		self.topwords.append(word)
