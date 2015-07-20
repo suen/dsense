@@ -7,4 +7,10 @@ Events are detected using detecting entity and enriched with NLP tools. A semant
 
 --Inspired by statuscalendar.com
 
+
+Architecture
+------------
+![Architecture](https://raw.githubusercontent.com/suen/dsense/master/garfield/doc/schema_global.png)
+
+
 More documentation coming up. Let me know if anybody is interested in this subject.
